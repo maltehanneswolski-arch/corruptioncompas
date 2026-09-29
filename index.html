@@ -44,8 +44,6 @@ body {
 header.mast { position: relative; padding-block: 48px 32px; display: grid; gap: 16px; }
 header.mast::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: var(--ink); }
 h1 { font: 32px/1.25 var(--display); color: var(--blue); margin: 0; letter-spacing: 0; white-space: nowrap; font-size: min(32px, calc((100vw - 104px) / 18)); }
-.cursor { display: inline-block; width: .5em; height: .8em; margin-left: .15em; background: var(--pink); vertical-align: -2px; animation: blink 1s steps(1) infinite; }
-@keyframes blink { 50% { visibility: hidden; } }
 #coin { position: absolute; right: 0; top: 44px; width: 48px; height: 48px; image-rendering: pixelated; }
 .lede { margin: 0; max-width: 56ch; }
 .mast.compact { padding-block: 16px 24px; gap: 8px; }
@@ -164,7 +162,7 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
 
 <div class="wrap">
   <header class="mast">
-    <h1>Corruption Compass<span class="cursor" aria-hidden="true"></span></h1>
+    <h1>Corruption Compass</h1>
     <canvas id="coin" width="16" height="16" aria-hidden="true"></canvas>
     <p class="lede">Answer ten questions to find out how corrupt you are.</p>
   </header>
