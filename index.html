@@ -92,6 +92,10 @@ h2 { font: 24px/1.25 var(--display); margin: 0; white-space: nowrap; }
 .end small { font: 20px/1 var(--body); text-transform: none; }
 
 .slide { grid-area: slide; display: grid; gap: 16px; min-width: 0; align-content: center; }
+.ladder { grid-area: slide; display: grid; gap: 8px; min-width: 0; align-content: center; }
+.ladder .px-btn { width: 100%; text-align: left; background: var(--paper-2); }
+.ladder .px-btn::before { content: "> "; color: var(--blue); }
+.ladder .px-btn:hover::before, .ladder .px-btn.picked::before { color: inherit; }
 .readout { display: flex; justify-content: center; align-items: center; gap: 4px; font: 24px/1.2 var(--display); }
 #amount { font: inherit; width: 100%; max-width: 11ch; min-height: 48px; padding: 4px 8px; background: var(--paper-2); color: var(--ink); border: 0; border-bottom: 4px solid var(--ink); text-align: left; -moz-appearance: textfield; }
 #amount::-webkit-outer-spin-button, #amount::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
@@ -182,13 +186,14 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
     <p class="scenario" id="qText"></p>
     <p class="ask" id="qAsk"></p>
     <div class="scale" role="group" aria-labelledby="qAsk">
-      <button class="px-btn free end" id="freeBtn" type="button">For free<small>as a favour</small></button>
-      <div class="slide">
+      <button class="px-btn free end" id="freeBtn" type="button"><span id="freeMain">For free</span><small id="freeSub">as a favour</small></button>
+      <div class="ladder" id="ladder" hidden></div>
+      <div class="slide" id="slide">
         <label class="readout" for="amount"><span aria-hidden="true">€</span><input type="text" id="amount" value="100" inputmode="numeric" autocomplete="off" aria-label="Your price in euros"></label>
         <input type="range" id="price" min="0" max="42" step="1" value="6" aria-label="Your price" aria-valuetext="€100">
         <button class="px-btn deal" id="takeBtn" type="button">Deal at €100</button>
       </div>
-      <button class="px-btn never end" id="neverBtn" type="button">Never<small>not for any price</small></button>
+      <button class="px-btn never end" id="neverBtn" type="button"><span id="neverMain">Never</span><small id="neverSub">not for any price</small></button>
     </div>
     <div class="nav">
       <button class="link" id="backBtn" type="button">&lt; Back</button>
@@ -251,18 +256,24 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
     { harm: 3, title: "Snitches get stitches", icon: "file",
       text: "Someone leaked proof of your company's safety violations to the press. The access logs tell you who it was: a colleague you like, though not a friend. Legal wants the name. The colleague will be fired and sued.",
       ask: "What bonus would get you to hand over the name?" },
-    { harm: 5, title: "A killer bonus", icon: "car",
-      text: "You work at a car maker. Your report shows a steering fault that will kill about ten drivers a year. A recall would cost the company a fortune. Your manager offers you a bonus to leave the report in your drawer.",
-      ask: "How big a bonus?" },
+    { harm: 5, title: "A killer promotion", icon: "car",
+      text: "You work at a car maker. Your report shows a steering fault that will kill about ten drivers a year. A recall would cost the company a fortune. Your manager does not offer money. She talks about your future at the company, if the report stays in your drawer.",
+      ask: "What job makes you close the drawer?",
+      free: ["Nothing", "I'd do it anyway"], never: ["Never", "no job is worth it"],
+      ladder: ["A good review", "Team lead", "Head of department", "A seat on the board"] },
     { harm: 4, title: "Selling out your people", icon: "spy",
-      text: "At work, a diplomat from a country hostile to yours starts talking to you. They want copies of your employer's internal documents every month, paid into an account abroad.",
-      ask: "For how much do you turn?" },
+      text: "A diplomat from a country hostile to yours wants copies of your employer's internal documents every month. He does not offer money. He opens a folder and shows you what his service already knows about you.",
+      ask: "What would they need to have on you?",
+      free: ["Nothing", "I'd hand them over anyway"], never: ["Never", "let them publish it"],
+      ladder: ["An embarrassing photo", "An affair", "A debt nobody knows about", "A crime I got away with"] },
     { harm: 2, title: "The will", icon: "will",
       text: "You look after an elderly woman with dementia. Her nephew asks you to witness a new will that leaves him everything and her grandchildren nothing. She would sign whatever you put in front of her.",
       ask: "What cut do you want?" },
     { harm: 5, title: "Propaganda minister", icon: "megaphone",
-      text: "Suddenly your skills are exactly what propaganda needs. A party from the opposite end of the political spectrum wants to hire you. Your work would help their propaganda and, at worst, get people hurt or killed.",
-      ask: "What would the salary have to be before you consider it?" },
+      text: "Suddenly your skills are exactly what propaganda needs. A party from the opposite end of the political spectrum wants you. They offer no salary, only rank and a place at the top table. Your work would fuel their propaganda and, at worst, get people hurt or killed.",
+      ask: "What rank gets you in the door?",
+      free: ["Nothing", "I'd volunteer"], never: ["Never", "not for any title"],
+      ladder: ["Speechwriter", "Head of communications", "Minister", "Their successor"] },
     { harm: 3, title: "Hit-and-run", icon: "cheque",
       text: "Late one night the son of a rich business family knocks a cyclist off her bike and drives away. She survives with a shattered leg. The family owns half the town and holds two seats in parliament. They ask you to tell the police the boy was at your place all evening.",
       ask: "How much do they have to write on the cheque?" },
@@ -312,16 +323,18 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
   const fmtShort = fmtEUR;
   const nearestStep = (v) => { let best = 0; for (let k = 1; k < LADDER.length; k++) if (Math.abs(Math.log10(LADDER[k]) - Math.log10(v)) < Math.abs(Math.log10(LADDER[best]) - Math.log10(v))) best = k; return best; };
 
-  // answer: null (unanswered) | { kind: "free" } | { kind: "never" } | { kind: "price", value }  (value in euros, typed or from the slider)
+  // answer: null (unanswered) | { kind: "free" } | { kind: "never" } | { kind: "price", value } (euros) | { kind: "ladder", step } (non-money offers, step 0 = cheapest)
   const blank = () => ({ screen: "intro", i: 0, answers: Array(QUESTIONS.length).fill(null) });
   let state = blank();
 
-  const priceOf = (a) => a.kind === "free" ? 0 : a.value;
+  const priceOf = (a) => a.kind === "price" ? a.value : 0;
 
   /* ---------- Scoring (pure) ---------- */
   // Cheapness per accepted offer: free = 1, €10 or less ≈ 0.95, €100 million or more = 0.
+  // A ladder of four non-money offers maps to 0.8, 0.6, 0.4, 0.2.
   function cheapness(a) {
     if (a.kind === "free") return 1;
+    if (a.kind === "ladder") return 1 - (a.step + 1) / 5;
     const lg = Math.min(8, Math.max(1, Math.log10(a.value)));
     return 0.95 * (8 - lg) / 7;
   }
@@ -373,7 +386,23 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
     drawIcon($("qIcon"), ICONS[q.icon]);
     $("qText").textContent = q.text;
     $("qAsk").textContent = q.ask;
-    setPrice(a && a.kind === "price" ? a.value : 100);
+    const [fm, fs] = q.free || ["For free", "as a favour"];
+    const [nm, nsub] = q.never || ["Never", "not for any price"];
+    $("freeMain").textContent = fm; $("freeSub").textContent = fs;
+    $("neverMain").textContent = nm; $("neverSub").textContent = nsub;
+    $("slide").hidden = !!q.ladder;
+    $("ladder").hidden = !q.ladder;
+    if (q.ladder) {
+      $("ladder").replaceChildren(...q.ladder.map((label, k) => {
+        const b = document.createElement("button");
+        b.type = "button"; b.className = "px-btn" + (a && a.kind === "ladder" && a.step === k ? " picked" : "");
+        b.textContent = label;
+        b.addEventListener("click", () => answer({ kind: "ladder", step: k }));
+        return b;
+      }));
+    } else {
+      setPrice(a && a.kind === "price" ? a.value : 100);
+    }
     $("freeBtn").classList.toggle("picked", !!a && a.kind === "free");
     $("neverBtn").classList.toggle("picked", !!a && a.kind === "never");
     $("backBtn").disabled = state.i === 0;
@@ -466,10 +495,11 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
       let cell;
       if (!a || a.kind === "never") cell = `<span class="tag never">Never</span>`;
       else if (a.kind === "free") cell = `<span class="tag free">Free</span>`;
+      else if (a.kind === "ladder") cell = q.ladder[a.step];
       else cell = fmtShort(a.value);
       return `<tr><td>${q.title}</td><td aria-label="Harm ${q.harm} of 5">${harmBoxes(q.harm)}</td><td class="num">${cell}</td></tr>`;
     }).join("");
-    $("rTotal").textContent = fmtEUR(r.total);
+    $("rTotal").textContent = fmtEUR(r.total) + " and a few favours";
 
     $("shareText").value = `I'm ${t.name} on the Corruption Compass (hands ${signed(r.x)}, price ${signed(r.y)}). I'd take ${r.taken} of 10 offers. Where do you land?`;
     $("copyNote").textContent = "";
@@ -710,7 +740,7 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
   function postToNetlify(r) {
     if (window.claude || !/^https?:$/.test(location.protocol)) return;
     const body = new URLSearchParams({ "form-name": "results", x: r.x, y: r.y, type: r.type, taken: r.taken, total: r.total });
-    state.answers.forEach((a, k) => body.set("q" + (k + 1), !a ? "" : a.kind === "price" ? String(a.value) : a.kind));
+    state.answers.forEach((a, k) => body.set("q" + (k + 1), !a ? "" : a.kind === "price" ? String(a.value) : a.kind === "ladder" ? QUESTIONS[k].ladder[a.step] : a.kind));
     fetch("/", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: body.toString() }).catch(() => {});
   }
 
@@ -724,7 +754,7 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
     const [db, id] = await Promise.all([cap("db"), idReady]);
     if (!db || !id) return;
     // Anonymous: only the position, the type and the ten answers. No name, no id beyond the document path.
-    const answers = state.answers.map(a => !a ? null : a.kind === "price" ? a.value : a.kind);
+    const answers = state.answers.map((a, k) => !a ? null : a.kind === "price" ? a.value : a.kind === "ladder" ? QUESTIONS[k].ladder[a.step] : a.kind);
     try { await db.doc("results/" + id).set({ x: r.x, y: r.y, type: r.type, answers, at: Date.now() }); } catch (e) { /* view-only visitors cannot save */ }
   }
 
@@ -787,7 +817,7 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
   }
 
   /* ---------- Boot (keeps progress across live updates) ---------- */
-  const validAnswer = (a) => a === null || (a && (a.kind === "free" || a.kind === "never" || (a.kind === "price" && Number.isFinite(a.value) && a.value >= 1)));
+  const validAnswer = (a) => a === null || (a && (a.kind === "free" || a.kind === "never" || (a.kind === "price" && Number.isFinite(a.value) && a.value >= 1) || (a.kind === "ladder" && Number.isInteger(a.step) && a.step >= 0 && a.step < 4)));
   function start(saved) {
     if (saved && Array.isArray(saved.answers) && saved.answers.length === QUESTIONS.length && saved.answers.every(validAnswer)) state = saved;
     show(state.screen || "intro");
