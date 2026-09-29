@@ -404,8 +404,6 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
     el("rect", { x: P0 + S / 2 - 1, y: P0, width: 2, height: S, style: "fill: var(--ink)" });
     el("rect", { x: P0, y: P0 + S / 2 - 1, width: S, height: 2, style: "fill: var(--ink)" });
     el("rect", { x: P0 - 2, y: P0 - 2, width: S + 4, height: S + 4, style: "fill: none; stroke: var(--ink); stroke-width: 4" });
-    el("rect", { x: px(-3.5), y: px(-3.5), width: 7 * U, height: 7 * U,
-      style: "fill: none; stroke: var(--ink-soft); stroke-width: 2; stroke-dasharray: 4 4" });
 
     const qn = (x, y, t, anchor) => el("text", { x, y, "font-size": 12, "text-anchor": anchor, style: "fill: var(--ink)" }, t);
     qn(P0 + 8, P0 + 20, "INCORRUPTIBLE", "start");
@@ -690,8 +688,7 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
   const FIGURES = [
     { name: "Mandela", x: -9, y: -7 },
     { name: "Trump", x: 7, y: -6 },
-    { name: "Infantino", x: 8, y: -3 },
-    { name: "Netanyahu", x: 6, y: 2 }
+    { name: "Infantino", x: 8, y: -3 }
   ];
 
   /* ---------- Other players (shown only on the result screen) ---------- */
