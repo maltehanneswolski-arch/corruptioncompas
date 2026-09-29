@@ -436,7 +436,7 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
     el("rect", { x: cx - 6, y: cy - 6, width: 12, height: 12, style: "fill: var(--pink)" }, null, pin);
     el("title", {}, `You: ${r.x}, ${r.y}`, pin);
     const right = cx > 300;
-    const ly = cy < 80 ? cy + 30 : cy - 16;
+    const ly = cy < 80 ? cy + 4 : cy - 16;
     el("rect", { x: right ? cx - 52 : cx + 14, y: ly - 14, width: 38, height: 18, style: "fill: var(--paper)" });
     el("text", { x: right ? cx - 33 : cx + 33, y: ly, "font-size": 14, "text-anchor": "middle", style: "fill: var(--ink)" }, "YOU");
   }
