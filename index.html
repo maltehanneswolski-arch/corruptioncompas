@@ -5,19 +5,19 @@
 <style>
 /* Layout: pixel arcade on an 8px grid. One column, stepped-corner panels, bitmap display type, a spinning pixel coin as the mark. Single light look by choice. */
 :root {
-  --paper: #DDEBF7;
-  --paper-2: #CFE2F3;
+  --paper: #DEE6EC;
+  --paper-2: #CDD8E1;
   --ink: #1A1A1A;
   --ink-soft: #3F4A55;
-  --rule: #A9C4DB;
-  --blue: #4B3BFF;
-  --pink: #FF5CA8;
-  --green: #5CE1A0;
-  --yellow: #FFD23F;
-  --q-clean: #E1DCFF;
-  --q-merc: #FFF0B8;
-  --q-fixer: #D3F5E4;
-  --q-villain: #FFD3E6;
+  --rule: #A7B6C2;
+  --blue: #2E3A8C;
+  --pink: #CD7360;
+  --green: #8FB59B;
+  --yellow: #D6A94F;
+  --q-clean: #D9DCEA;
+  --q-merc: #E8E0C8;
+  --q-fixer: #D3E1D6;
+  --q-villain: #E4D3D0;
   --crowd: #5F7488;
   --display: "Press Start 2P", "Silkscreen", monospace;
   --label: "Silkscreen", "VT323", monospace;
@@ -96,6 +96,7 @@ h2 { font: 24px/1.25 var(--display); margin: 0; white-space: nowrap; }
 .ladder { grid-area: slide; display: grid; gap: 8px; min-width: 0; align-content: center; }
 .ladder .px-btn { width: 100%; text-align: left; background: #FFFFFF; white-space: nowrap; font-size: min(16px, calc((100vw - 104px) / 21)); padding-inline: 12px; }
 .ladder .px-btn::before { content: "> "; color: var(--blue); }
+.ladder .px-btn:hover { background: var(--ink); color: var(--paper); }
 .ladder .px-btn:hover::before, .ladder .px-btn.picked::before { color: inherit; }
 .readout { display: flex; justify-content: center; align-items: center; gap: 4px; font: 24px/1.2 var(--display); }
 #amount { font: inherit; width: 100%; max-width: 11ch; min-height: 48px; padding: 4px 8px; background: #FFFFFF; color: var(--ink); border: 0; border-bottom: 4px solid var(--ink); text-align: left; -moz-appearance: textfield; }
@@ -466,8 +467,6 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
     }
     el("g", { id: "crowdLayer" });
     const cx = Math.round(px(r.x)), cy = Math.round(px(r.y));
-    el("rect", { x: cx - 1, y: P0, width: 2, height: S, style: "fill: var(--pink)" });
-    el("rect", { x: P0, y: cy - 1, width: S, height: 2, style: "fill: var(--pink)" });
     const pin = el("g", { class: "pin" });
     el("rect", { x: cx - 10, y: cy - 10, width: 20, height: 20, style: "fill: var(--ink)" }, null, pin);
     el("rect", { x: cx - 6, y: cy - 6, width: 12, height: 12, style: "fill: var(--pink)" }, null, pin);
