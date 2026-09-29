@@ -233,6 +233,15 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
   </section>
 </div>
 
+<!-- Netlify Forms: this static form only tells Netlify which fields to expect. The game posts to it from the script. -->
+<form name="results" method="POST" data-netlify="true" netlify-honeypot="bot-field" hidden aria-hidden="true">
+  <input type="hidden" name="form-name" value="results">
+  <input name="bot-field">
+  <input name="x"><input name="y"><input name="type"><input name="taken"><input name="total">
+  <input name="q1"><input name="q2"><input name="q3"><input name="q4"><input name="q5">
+  <input name="q6"><input name="q7"><input name="q8"><input name="q9"><input name="q10">
+</form>
+
 <script>
 (() => {
   const QUESTIONS = [
@@ -373,7 +382,7 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
   function answer(a) {
     state.answers[state.i] = a;
     if (state.i < QUESTIONS.length - 1) { state.i++; show("q"); }
-    else { show("result"); saveResult(score(state.answers)); }
+    else { const r = score(state.answers); show("result"); saveResult(r); postToNetlify(r); }
     window.scrollTo({ top: 0 });
   }
 
@@ -696,6 +705,14 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
     { name: "B. Clinton", x: -3, y: 5 },
     { name: "Le Pen", x: 5, y: 3 }
   ];
+
+  /* ---------- Netlify Forms (public site only; the artifact uses its own store) ---------- */
+  function postToNetlify(r) {
+    if (window.claude || !/^https?:$/.test(location.protocol)) return;
+    const body = new URLSearchParams({ "form-name": "results", x: r.x, y: r.y, type: r.type, taken: r.taken, total: r.total });
+    state.answers.forEach((a, k) => body.set("q" + (k + 1), !a ? "" : a.kind === "price" ? String(a.value) : a.kind));
+    fetch("/", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: body.toString() }).catch(() => {});
+  }
 
   /* ---------- Other players (shown only on the result screen) ---------- */
   // Each player keeps one anonymous document, results/<their id>, holding only x, y and a timestamp.
