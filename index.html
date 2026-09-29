@@ -693,7 +693,7 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
     { name: "Mandela", x: -9, y: -7 },
     { name: "Trump", x: 7, y: -6 },
     { name: "Infantino", x: 8, y: -3 },
-    { name: "Clinton", x: -3, y: 5 },
+    { name: "B. Clinton", x: -3, y: 5 },
     { name: "Le Pen", x: 5, y: 3 }
   ];
 
@@ -706,7 +706,9 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
   async function saveResult(r) {
     const [db, id] = await Promise.all([cap("db"), idReady]);
     if (!db || !id) return;
-    try { await db.doc("results/" + id).set({ x: r.x, y: r.y, at: Date.now() }); } catch (e) { /* view-only visitors cannot save */ }
+    // Anonymous: only the position, the type and the ten answers. No name, no id beyond the document path.
+    const answers = state.answers.map(a => !a ? null : a.kind === "price" ? a.value : a.kind);
+    try { await db.doc("results/" + id).set({ x: r.x, y: r.y, type: r.type, answers, at: Date.now() }); } catch (e) { /* view-only visitors cannot save */ }
   }
 
   async function startCrowd() {
