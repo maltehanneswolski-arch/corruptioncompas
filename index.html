@@ -145,8 +145,6 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
 #copyNote { color: var(--ink-soft); }
 #shareText { font: 20px var(--body); width: 100%; background: var(--paper-2); color: var(--ink); border: 4px solid var(--ink); padding: 8px; resize: none; }
 
-@keyframes pinblink { 0%, 100% { visibility: visible; } 50% { visibility: hidden; } }
-.pin { animation: pinblink .3s steps(1) 4; }
 
 @media (max-width: 640px) {
   .result-grid { grid-template-columns: minmax(0, 1fr); }
@@ -330,7 +328,7 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
   let state = blank();
 
   const priceOf = (a) => a.kind === "price" ? a.value : 0;
-  const rung = (q, a) => a.step < q.ladder.length ? q.ladder[a.step] : "Only for money";
+  const rung = (q, a) => a.step < q.ladder.length ? q.ladder[a.step] : "A lot of money";
 
   /* ---------- Scoring (pure) ---------- */
   // Cheapness per accepted offer: free = 1, €10 or less ≈ 0.95, €100 million or more = 0.
@@ -396,7 +394,7 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
     $("slide").hidden = !!q.ladder;
     $("ladder").hidden = !q.ladder;
     if (q.ladder) {
-      $("ladder").replaceChildren(...[...q.ladder, "Only for money"].map((label, k) => {
+      $("ladder").replaceChildren(...[...q.ladder, "A lot of money"].map((label, k) => {
         const b = document.createElement("button");
         b.type = "button"; b.className = "px-btn" + (a && a.kind === "ladder" && a.step === k ? " picked" : "");
         b.textContent = label;
@@ -582,17 +580,17 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
     car: [
       "................",
       "................",
-      "................",
-      ".....kkkkkk.....",
-      "....kppppppk....",
-      "...kpwwppwwpk...",
-      "..kppwwppwwppk..",
-      ".kppppppppppppk.",
-      ".kppppppppppppk.",
+      "......kkkkk.....",
+      ".....kwwwwwk....",
+      "....kwwwkwwwk...",
+      "...kwwwwkwwwwk..",
+      "..kkkkkkkkkkkkk.",
+      ".kbbbbbbbbbbbbky",
+      ".kbbbbbbbbbbbbk.",
       ".kkkkkkkkkkkkkk.",
-      "..kkwwkkkkwwkk..",
-      "..kwkkwkkwkkwk..",
-      "..kkwwkkkkwwkk..",
+      "..kkwkk..kkwkk..",
+      "..kwwwk..kwwwk..",
+      "..kkwkk..kkwkk..",
       "...kkk....kkk...",
       "................",
       "................"],
