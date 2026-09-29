@@ -43,21 +43,22 @@ body {
 /* Masthead */
 header.mast { position: relative; padding-block: 48px 32px; display: grid; gap: 16px; }
 header.mast::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: var(--ink); }
-h1 { font: 48px/1.2 var(--display); color: var(--blue); margin: 0; letter-spacing: 0; }
+h1 { font: 32px/1.25 var(--display); color: var(--blue); margin: 0; letter-spacing: 0; white-space: nowrap; font-size: min(32px, calc((100vw - 104px) / 18)); }
 .cursor { display: inline-block; width: .5em; height: .8em; margin-left: .15em; background: var(--pink); vertical-align: -2px; animation: blink 1s steps(1) infinite; }
 @keyframes blink { 50% { visibility: hidden; } }
-#coin { position: absolute; right: 0; top: 32px; width: 64px; height: 64px; image-rendering: pixelated; }
+#coin { position: absolute; right: 0; top: 44px; width: 48px; height: 48px; image-rendering: pixelated; }
 .lede { margin: 0; max-width: 56ch; }
 .mast.compact { padding-block: 16px 24px; gap: 8px; }
-.mast.compact h1 { font-size: 24px; }
+.mast.compact h1 { font-size: min(24px, calc((100vw - 112px) / 18)); }
 .mast.compact .lede { display: none; }
-.mast.compact #coin { width: 32px; height: 32px; top: 8px; }
+.mast.compact #coin { width: 32px; height: 32px; top: 14px; }
 
 /* Screens */
 section[data-screen] { display: grid; grid-template-columns: minmax(0, 1fr); gap: 32px; }
 .eyebrow { font: 16px/1 var(--label); text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
 
-h2 { font: 32px/1.25 var(--display); margin: 0; }
+h2 { font: 24px/1.25 var(--display); margin: 0; white-space: nowrap; }
+#qTitle { font-size: min(24px, calc((100vw - 112px) / 23)); }
 .qhead { display: flex; align-items: center; gap: 16px; }
 #qIcon { width: 48px; height: 48px; flex: none; image-rendering: pixelated; }
 .scenario { margin: 0; font-size: 24px; max-width: 60ch; }
@@ -143,12 +144,10 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
 
 @media (max-width: 640px) {
   .result-grid { grid-template-columns: minmax(0, 1fr); }
-  h2 { font-size: 24px; }
   #qIcon { width: 32px; height: 32px; }
 }
 @media (max-width: 560px) {
-  h1 { font-size: 32px; }
-  #coin { width: 32px; height: 32px; top: 32px; }
+  #coin { width: 32px; height: 32px; top: 40px; }
   .scale { grid-template-columns: 1fr 1fr; grid-template-areas: "free never" "slide slide"; }
   .end { min-width: 0; }
   .readout { font-size: 16px; }
@@ -161,7 +160,7 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
 
 <div class="wrap">
   <header class="mast">
-    <h1>Corruption<br>Compass<span class="cursor" aria-hidden="true"></span></h1>
+    <h1>Corruption Compass<span class="cursor" aria-hidden="true"></span></h1>
     <canvas id="coin" width="16" height="16" aria-hidden="true"></canvas>
     <p class="lede">Answer ten questions to find out how corrupt you are.</p>
   </header>
@@ -185,7 +184,7 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
     <div class="scale" role="group" aria-labelledby="qAsk">
       <button class="px-btn free end" id="freeBtn" type="button">For free<small>as a favour</small></button>
       <div class="slide">
-        <label class="readout" for="amount"><span aria-hidden="true">€</span><input type="number" id="amount" min="1" step="1" value="100" inputmode="numeric" aria-label="Your price in euros"></label>
+        <label class="readout" for="amount"><span aria-hidden="true">€</span><input type="text" id="amount" value="100" inputmode="numeric" autocomplete="off" aria-label="Your price in euros"></label>
         <input type="range" id="price" min="0" max="42" step="1" value="6" aria-label="Your price" aria-valuetext="€100">
         <button class="px-btn deal" id="takeBtn" type="button">Deal at €100</button>
       </div>
@@ -300,8 +299,8 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
 
   const HARM_TOTAL = QUESTIONS.reduce((s, q) => s + q.harm, 0);
   const $ = (id) => document.getElementById(id);
-  const fmtEUR = (v) => "€" + v.toLocaleString("en-GB");
-  const fmtShort = (v) => v >= 1e6 ? `€${+(v / 1e6).toFixed(1)} million` : fmtEUR(v);
+  const fmtEUR = (v) => "€" + v.toLocaleString("de-DE");
+  const fmtShort = fmtEUR;
   const nearestStep = (v) => { let best = 0; for (let k = 1; k < LADDER.length; k++) if (Math.abs(Math.log10(LADDER[k]) - Math.log10(v)) < Math.abs(Math.log10(LADDER[best]) - Math.log10(v))) best = k; return best; };
 
   // answer: null (unanswered) | { kind: "free" } | { kind: "never" } | { kind: "price", value }  (value in euros, typed or from the slider)
@@ -351,7 +350,7 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
   let current = 100;
   function setPrice(v, from) {
     current = Math.max(1, Math.round(v));
-    if (from !== "amount") $("amount").value = current;
+    $("amount").value = current.toLocaleString("de-DE");
     if (from !== "slider") $("price").value = nearestStep(current);
     $("price").setAttribute("aria-valuetext", fmtShort(current));
     $("takeBtn").textContent = `Deal at ${fmtShort(current)}`;
@@ -480,7 +479,12 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
   const deal = () => answer({ kind: "price", value: current });
   $("takeBtn").addEventListener("click", deal);
   $("price").addEventListener("input", (e) => setPrice(LADDER[+e.target.value], "slider"));
-  $("amount").addEventListener("input", (e) => { const v = +e.target.value; if (v >= 1) setPrice(v, "amount"); });
+  $("amount").addEventListener("input", (e) => {
+    const digits = e.target.value.replace(/\D/g, "").slice(0, 12);
+    if (!digits) { e.target.value = ""; return; }
+    setPrice(+digits, "amount");
+    e.target.setSelectionRange(e.target.value.length, e.target.value.length);
+  });
   $("amount").addEventListener("blur", () => setPrice(current));
   for (const id of ["price", "amount"]) $(id).addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); deal(); } });
   $("backBtn").addEventListener("click", () => { if (state.i > 0) { state.i--; show("q"); } });
@@ -502,22 +506,22 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
   /* ---------- Pixel icons (16x16; . empty, k ink, b blue, p pink, y yellow, g green, w paper) ---------- */
   const ICONS = {
     missile: [
-      "................",
-      "..........kk....",
-      ".........kyyk...",
-      "........kyyyyk..",
-      ".......kyyyyk...",
-      "......kyyyyk....",
-      ".....kyyyyk.....",
-      "....kkyyyk......",
-      "...kpkyyk.......",
-      "..kppkyk........",
-      ".kpppkk.........",
-      "kppppk..........",
-      ".kkkk...........",
-      "................",
-      "................",
-      "................"],
+      ".......kk.......",
+      "......kkkk......",
+      ".....kk..kk.....",
+      "....kk....kk....",
+      "...kk..kk..kk...",
+      "..kk..kppk..kk..",
+      ".kk..kppppk..kk.",
+      "kkkkkkppppkkkkkk",
+      "kkkkkkppppkkkkkk",
+      ".kk..kppppk..kk.",
+      "..kk..kppk..kk..",
+      "...kk..kk..kk...",
+      "....kk....kk....",
+      ".....kk..kk.....",
+      "......kkkk......",
+      ".......kk......."],
     file: [
       "................",
       "...kkkkkkkk.....",
