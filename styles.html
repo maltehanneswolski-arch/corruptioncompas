@@ -1,0 +1,351 @@
+<title>Compass Style Book</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@500;700&family=Inter+Tight:wght@400;500;700&family=Anton&family=Caveat:wght@600&family=Space+Mono:wght@400;700&family=Lora:wght@400;600&family=Unbounded:wght@700&family=IBM+Plex+Sans:wght@400;600&family=JetBrains+Mono:wght@500&family=Chakra+Petch:wght@700&family=Share+Tech+Mono&family=Rajdhani:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Monoton&family=Press+Start+2P&family=Silkscreen&family=VT323&family=Permanent+Marker&family=Cormorant+Garamond:wght@400;600&family=Alex+Brush&family=Pinyon+Script&family=Playfair+Display:wght@500&family=Bungee&family=Fredoka:wght@500;600&family=Figtree:wght@400;600&display=swap">
+<style>
+/* Layout: a neutral catalogue frame (so it does not compete) holding fifteen self-contained previews of the same question screen. */
+:root {
+  --bg: #efefec;
+  --panel: #ffffff;
+  --fg: #1c1c1a;
+  --soft: #5c5c57;
+  --line: #d6d6d0;
+  --pick: #1f6f4a;
+  --frame: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #151514; --panel: #1f1f1d; --fg: #ececE8; --soft: #a5a59e; --line: #34342f; --pick: #5fc190; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #151514; --panel: #1f1f1d; --fg: #ececE8; --soft: #a5a59e; --line: #34342f; --pick: #5fc190; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--frame); font-size: 1rem; line-height: 1.5; padding-inline: 16px; padding-block: 0 56px; }
+.wrap { max-width: 1240px; margin: 0 auto; }
+header.top { padding-block: 40px 28px; display: grid; gap: 10px; max-width: 70ch; }
+header.top h1 { font-size: clamp(1.9rem, 4.5vw, 2.8rem); line-height: 1.05; margin: 0; letter-spacing: -.015em; text-wrap: balance; }
+header.top p { margin: 0; color: var(--soft); text-wrap: pretty; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: .9rem; color: var(--soft); }
+.legend b { color: var(--pick); }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 400px), 1fr)); gap: 28px 24px; }
+.opt { display: grid; gap: 12px; align-content: start; min-width: 0; }
+.meta { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.num { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--soft); }
+.meta h2 { font-size: 1.2rem; margin: 0; }
+.badge { font-size: .75rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--pick); border: 1px solid var(--pick); padding: 1px 8px; border-radius: 999px; }
+.notes { display: grid; gap: 4px; font-size: .92rem; margin: 0; }
+.notes div { display: grid; grid-template-columns: 5.2rem minmax(0, 1fr); gap: 8px; }
+.notes dt { color: var(--soft); }
+.notes dd { margin: 0; }
+.choose { justify-self: start; font: inherit; font-weight: 600; font-size: .92rem; color: var(--fg); background: var(--panel); border: 1px solid var(--line); padding: 10px 16px; min-height: 44px; cursor: pointer; border-radius: 6px; }
+.choose:hover { border-color: var(--fg); }
+.choose:focus-visible { outline: 2px solid var(--pick); outline-offset: 2px; }
+.choose.done { border-color: var(--pick); color: var(--pick); }
+#toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 6px; font-size: .92rem; max-width: calc(100% - 32px); }
+
+/* ---------- Shared preview skeleton ---------- */
+.stage { position: relative; overflow: hidden; min-height: 400px; padding: 22px; display: flex; flex-direction: column; gap: 12px; isolation: isolate; }
+.stage > * { position: relative; z-index: 1; }
+.stage .deco { position: absolute; z-index: 0; pointer-events: none; }
+.p-top { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; }
+.p-title { margin: 0; }
+.p-text { margin: 0; font-size: 15px; line-height: 1.45; }
+.p-ask { margin: 0; font-weight: 600; font-size: 15px; }
+.p-scale { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; margin-top: auto; }
+.p-mid { display: grid; gap: 2px; min-width: 0; text-align: center; }
+.p-amt { font-size: 1.8rem; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.p-free, .p-never, .p-deal { font: inherit; cursor: pointer; min-height: 44px; padding: 8px 12px; border: 0; }
+.p-deal { align-self: center; }
+.stage input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 36px; background: transparent; margin: 0; cursor: pointer; }
+.stage input[type=range]::-webkit-slider-runnable-track { height: var(--tr-h, 6px); background: var(--tr, #000); border-radius: var(--tr-r, 0); }
+.stage input[type=range]::-moz-range-track { height: var(--tr-h, 6px); background: var(--tr, #000); border-radius: var(--tr-r, 0); }
+.stage input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: var(--th, 22px); height: var(--th, 22px); margin-top: calc((var(--tr-h, 6px) - var(--th, 22px)) / 2); background: var(--th-bg, #fff); border: var(--th-b, 2px solid #000); border-radius: var(--th-r, 50%); box-shadow: var(--th-sh, none); box-sizing: border-box; }
+.stage input[type=range]::-moz-range-thumb { width: var(--th, 22px); height: var(--th, 22px); background: var(--th-bg, #fff); border: var(--th-b, 2px solid #000); border-radius: var(--th-r, 50%); box-shadow: var(--th-sh, none); box-sizing: border-box; }
+.stage :focus-visible { outline: 2px solid var(--focus, #1d6bff); outline-offset: 3px; }
+@media (max-width: 440px) { .p-scale { grid-template-columns: 1fr 1fr; } .p-mid { grid-column: 1 / -1; grid-row: 2; } }
+
+/* 01 Neo-brutalism */
+.s1 .stage { background: #FFF6D8; color: #000; font-family: "Space Grotesk", sans-serif; border: 2px solid #000; border-radius: 12px; box-shadow: 6px 6px 0 #000; --tr: #000; --th: 26px; --th-bg: #FFD93D; --th-b: 2px solid #000; --th-r: 6px; }
+.s1 .p-top span { border: 2px solid #000; border-radius: 999px; padding: 2px 10px; font-weight: 700; background: #fff; }
+.s1 .p-title { font: 400 2.5rem/1 "Archivo Black", sans-serif; letter-spacing: -.02em; }
+.s1 .p-free, .s1 .p-never, .s1 .p-deal { border: 2px solid #000; border-radius: 10px; box-shadow: 4px 4px 0 #000; font-weight: 700; transition: transform .1s, box-shadow .1s; }
+.s1 .p-free { background: #A6F18C; } .s1 .p-never { background: #FF6B6B; } .s1 .p-deal { background: #FFD93D; }
+.s1 .p-free:active, .s1 .p-never:active, .s1 .p-deal:active { transform: translate(4px, 4px); box-shadow: 0 0 0 #000; }
+.s1 .p-amt { font-family: "Archivo Black", sans-serif; }
+
+/* 02 Swiss */
+.s2 .stage { background: #F3F1EC; color: #111; font-family: "Inter Tight", Helvetica, Arial, sans-serif; --tr: #111; --tr-h: 2px; --th: 16px; --th-bg: #111; --th-b: 0; --th-r: 0; --focus: #E3120B; }
+.s2 .p-top { text-transform: uppercase; letter-spacing: .05em; font-size: 11px; color: #5e5e5e; border-bottom: 1px solid #111; padding-bottom: 8px; }
+.s2 .p-title { font-weight: 500; font-size: 3rem; line-height: .92; letter-spacing: -.03em; }
+.s2 .p-title span { display: block; padding-left: 18%; }
+.s2 .p-text { max-width: 30ch; margin-left: 18%; }
+.s2 .p-ask { margin-left: 18%; }
+.s2 .p-free { background: transparent; border-top: 1px solid #111; text-align: left; font-weight: 500; }
+.s2 .p-never { background: #E3120B; color: #fff; aspect-ratio: 1; width: 76px; font-weight: 500; text-align: left; align-self: stretch; display: flex; align-items: flex-end; }
+.s2 .p-deal { background: #111; color: #fff; font-weight: 500; align-self: start; }
+.s2 .p-amt { font-weight: 500; letter-spacing: -.02em; }
+
+/* 03 Tabloid editorial */
+.s3 .stage { background: #EFEDE6; color: #111; font-family: "Lora", serif; --tr: #111; --tr-h: 4px; --th: 22px; --th-bg: #F6F14A; --th-b: 2px solid #111; }
+.s3 .p-top { font: 700 11px "Space Mono", monospace; letter-spacing: .08em; text-transform: uppercase; border-top: 4px solid #111; border-bottom: 1px solid #111; padding: 6px 0; }
+.s3 .p-title { font: 400 4.2rem/.84 "Anton", sans-serif; text-transform: uppercase; letter-spacing: -.01em; }
+.s3 .p-title span { position: relative; display: inline-block; }
+.s3 .p-title span::after { content: ""; position: absolute; inset: -8% -6%; border: 5px solid #F6F14A; border-radius: 48% 52% 50% 46% / 60% 40% 58% 42%; transform: rotate(-5deg); mix-blend-mode: multiply; }
+.s3 .deco.note { right: 18px; top: 58px; z-index: 2; background: #F6F14A; padding: 4px 10px; transform: rotate(6deg); font: 600 1.4rem "Caveat", cursive; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+.s3 .p-text { columns: 2; column-gap: 16px; font-size: 14px; }
+.s3 .p-free, .s3 .p-never, .s3 .p-deal { font: 700 12px "Space Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
+.s3 .p-free { background: #FFB3D9; } .s3 .p-never { background: #111; color: #fff; } .s3 .p-deal { background: #F6F14A; }
+.s3 .p-amt { font-family: "Anton", sans-serif; font-size: 2.2rem; }
+
+/* 04 Evidence-board scrapbook */
+.s4 .stage { background: #F3EADA radial-gradient(rgba(80,60,30,.12) 1px, transparent 1.4px) 0 0 / 14px 14px; color: #2F2A25; font-family: "Lora", serif; --tr: #2F2A25; --tr-h: 3px; --th: 24px; --th-bg: #fff; --th-b: 2px solid #B3261E; }
+.s4 .p-top { font: 600 1.25rem "Caveat", cursive; }
+.s4 .p-title { font: 600 2.8rem/1 "Caveat", cursive; }
+.s4 .p-text { background: #fff; padding: 16px 16px 14px; transform: rotate(-1.2deg); box-shadow: 0 2px 6px rgba(50,40,30,.18), 0 12px 24px rgba(50,40,30,.10); }
+.s4 .p-text::before { content: ""; position: absolute; top: -11px; left: 50%; width: 90px; height: 24px; transform: translateX(-50%) rotate(3deg); background: rgba(242,227,160,.75); }
+.s4 .deco.pin { right: 22px; top: 20px; width: 16px; height: 16px; border-radius: 50%; background: #B3261E; box-shadow: 0 2px 3px rgba(0,0,0,.3); }
+.s4 .p-free { background: #fff; border: 1.5px dashed #2F2A25; transform: rotate(2deg); font-family: "Caveat", cursive; font-size: 1.3rem; }
+.s4 .p-never { background: transparent; color: #B3261E; border: 2.5px solid #B3261E; transform: rotate(-5deg); font: 700 13px "Space Mono", monospace; letter-spacing: .1em; text-transform: uppercase; }
+.s4 .p-deal { background: rgba(242,227,160,.9); font-family: "Caveat", cursive; font-size: 1.35rem; transform: rotate(-1deg); }
+.s4 .p-amt { font-family: "Caveat", cursive; font-size: 2.4rem; }
+
+/* 05 Cybercore dossier */
+.s5 .stage { background: #E9E9E6; color: #111; font-family: "IBM Plex Sans", sans-serif; background-image: linear-gradient(#C8C8C4 1px, transparent 1px), linear-gradient(90deg, #C8C8C4 1px, transparent 1px); background-size: 100% 32px, 32px 100%; --tr: #111; --tr-h: 1px; --th: 16px; --th-bg: #E5261F; --th-b: 0; --th-r: 0; --focus: #E5261F; }
+.s5 .p-top { font: 500 10px "JetBrains Mono", monospace; letter-spacing: .08em; text-transform: uppercase; color: #55554f; }
+.s5 .p-title { font: 700 2.2rem/.95 "Unbounded", sans-serif; letter-spacing: -.03em; }
+.s5 .p-text { border: 1px solid #111; background: #E9E9E6; padding: 26px 14px 12px; }
+.s5 .p-text::before { content: "EXHIBIT 10.A · SITE REPORT"; position: absolute; top: 8px; left: 14px; font: 500 10px "JetBrains Mono", monospace; letter-spacing: .08em; color: #55554f; }
+.s5 .p-free { background: #E9E9E6; border: 1px solid #111; font: 500 11px "JetBrains Mono", monospace; text-transform: uppercase; }
+.s5 .p-never { background: #E5261F; color: #fff; font: 500 11px "JetBrains Mono", monospace; text-transform: uppercase; }
+.s5 .p-deal { background: #111; color: #fff; font: 500 11px "JetBrains Mono", monospace; text-transform: uppercase; }
+.s5 .p-amt { font-family: "Unbounded", sans-serif; font-size: 1.6rem; }
+
+/* 06 Cyberpunk */
+.s6 .stage { background: #07070B; color: #F2F2F5; font-family: "Rajdhani", sans-serif; --tr: #00F0FF; --tr-h: 2px; --th: 18px; --th-bg: #07070B; --th-b: 2px solid #00F0FF; --th-r: 0; --focus: #00F0FF; }
+.s6 .p-top { font: 12px "Share Tech Mono", monospace; letter-spacing: .1em; text-transform: uppercase; color: #00F0FF; }
+.s6 .p-title { font: 700 2.6rem/1 "Chakra Petch", sans-serif; text-shadow: 4px 5px 0 #2a2a3a; text-transform: uppercase; }
+.s6 .p-text { font-size: 16px; border: 1.5px solid #00F0FF; padding: 14px 16px; clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px); }
+.s6 .p-free, .s6 .p-never, .s6 .p-deal { font: 600 14px "Rajdhani", sans-serif; letter-spacing: .12em; text-transform: uppercase; clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); }
+.s6 .p-free { background: #1a1a26; color: #F2F2F5; } .s6 .p-never { background: #00F0FF; color: #07070B; } .s6 .p-deal { background: #F2F2F5; color: #07070B; }
+.s6 .p-amt { font-family: "Chakra Petch", sans-serif; color: #00F0FF; }
+.s6 .deco.trace { right: -10px; top: 30px; width: 120px; height: 60px; border-top: 1.5px solid #00F0FF; border-left: 1.5px solid #00F0FF; opacity: .5; }
+
+/* 07 Synthwave */
+.s7 .stage { background: radial-gradient(ellipse at 50% 100%, #2A0B5E 0%, #12002B 65%); color: #fff; font-family: "Rajdhani", sans-serif; --tr: #17E1FF; --tr-h: 3px; --th: 20px; --th-bg: #FF2FD2; --th-b: 2px solid #fff; --th-sh: 0 0 12px #FF2FD2; --focus: #17E1FF; }
+.s7 .deco.sun { right: -40px; bottom: 60px; width: 220px; aspect-ratio: 1; border-radius: 50%; background: linear-gradient(#FFD84D, #FF9E1F 45%, #FF2FD2); -webkit-mask: repeating-linear-gradient(#000 0 78%, transparent 78% 100%) 0 0 / 100% 12%; mask: repeating-linear-gradient(#000 0 78%, transparent 78% 100%) 0 0 / 100% 12%; opacity: .55; }
+.s7 .deco.floor { left: -50%; right: -50%; bottom: 0; height: 90px; transform: perspective(300px) rotateX(60deg); transform-origin: bottom; background: linear-gradient(#17E1FF 2px, transparent 2px) 0 0 / 100% 22px, linear-gradient(90deg, #17E1FF 2px, transparent 2px) 0 0 / 30px 100%; opacity: .45; }
+.s7 .p-top { font: 12px "Share Tech Mono", monospace; letter-spacing: .12em; text-transform: uppercase; color: #17E1FF; }
+.s7 .p-title { font: 400 2.2rem/1.05 "Monoton", cursive; text-shadow: 0 0 8px #17E1FF, 0 0 22px #7A1FFF; }
+.s7 .p-text { font-size: 16px; font-weight: 500; }
+.s7 .p-free, .s7 .p-never, .s7 .p-deal { font: 600 14px "Rajdhani", sans-serif; letter-spacing: .12em; text-transform: uppercase; border-radius: 4px; }
+.s7 .p-free { background: transparent; color: #17E1FF; border: 2px solid #17E1FF; box-shadow: 0 0 10px #17E1FF; }
+.s7 .p-never { background: #FF2FD2; color: #12002B; } .s7 .p-deal { background: #FFD84D; color: #12002B; }
+.s7 .p-amt { font: 400 1.8rem "Monoton", cursive; text-shadow: 0 0 10px #FF2FD2; }
+
+/* 08 Pixel art */
+.s8 .stage { background: #F4F1EA; color: #1A1A1A; font-family: "VT323", monospace; --tr: #1A1A1A; --tr-h: 8px; --th: 22px; --th-bg: #4B3BFF; --th-b: 3px solid #1A1A1A; --th-r: 0; --focus: #FF5CA8; }
+.s8 .p-top { font: 12px "Silkscreen", monospace; text-transform: uppercase; }
+.s8 .p-title { font: 1.35rem/1.35 "Press Start 2P", monospace; color: #4B3BFF; }
+.s8 .p-text, .s8 .p-ask { font-size: 21px; line-height: 1.1; }
+.s8 .p-free, .s8 .p-never, .s8 .p-deal { font: 14px "Silkscreen", monospace; text-transform: uppercase; border: 4px solid #1A1A1A; clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px); }
+.s8 .p-free { background: #5CE1A0; } .s8 .p-never { background: #FF5CA8; } .s8 .p-deal { background: #FFD23F; }
+.s8 .p-amt { font: 1.25rem "Press Start 2P", monospace; }
+.s8 .deco.dither { left: 0; right: 0; bottom: 0; height: 14px; background: repeating-conic-gradient(#1A1A1A 0 25%, transparent 0 50%) 0 0 / 4px 4px; opacity: .3; }
+
+/* 09 Maximalism */
+.s9 .stage { background: #B8B4AE radial-gradient(rgba(0,0,0,.08) 1px, transparent 1.3px) 0 0 / 5px 5px; color: #111; font-family: "VT323", monospace; --tr: #000080; --tr-h: 6px; --th: 22px; --th-bg: #E8FF3D; --th-b: 2px solid #111; --th-r: 0; }
+.s9 .deco.anchor { left: -6px; bottom: 40px; font: 900 8.5rem/.8 "Anton", sans-serif; color: #fff; text-transform: uppercase; opacity: .9; text-shadow: -3px 0 #FF2D2D, 3px 0 #3DE1FF; }
+.s9 .p-top { font: 12px "Space Mono", monospace; }
+.s9 .p-title { align-self: flex-start; background: #E8FF3D; padding: 6px 12px; transform: rotate(-3deg); font: 400 1.9rem "Permanent Marker", cursive; box-shadow: 2px 3px 6px rgba(0,0,0,.25); }
+.s9 .p-text { background: #E8E8E8; border: 2px solid; border-color: #fff #555 #555 #fff; padding: 30px 12px 10px; font-size: 19px; line-height: 1.1; box-shadow: 4px 4px 0 rgba(0,0,0,.35); }
+.s9 .p-text::before { content: "offer_10.txt"; position: absolute; left: 0; right: 0; top: 0; background: linear-gradient(90deg, #000080, #1084d0); color: #fff; font: 11px "Silkscreen", monospace; padding: 3px 6px; }
+.s9 .p-ask { font-size: 20px; background: #fff; align-self: flex-start; padding: 0 6px; }
+.s9 .p-free, .s9 .p-never, .s9 .p-deal { font: 18px "VT323", monospace; border: 2px solid; border-color: #fff #555 #555 #fff; }
+.s9 .p-free { background: #E8E8E8; } .s9 .p-never { background: #FF2D2D; color: #fff; } .s9 .p-deal { background: #3DE1FF; }
+.s9 .p-amt { font: 400 2rem "Permanent Marker", cursive; }
+
+/* 10 Victorian */
+.s10 .stage { background: #8C1D1D radial-gradient(ellipse at 50% 20%, rgba(255,255,255,.08), transparent 60%); color: #F3E9D6; font-family: "Cormorant Garamond", serif; text-align: center; --tr: #C9A24A; --tr-h: 2px; --th: 20px; --th-bg: radial-gradient(#F4DC8A, #C9A24A 60%, #8A6A26); --th-b: 1px solid #F3E9D6; --focus: #E6C76A; }
+.s10 .p-top { font-size: 13px; letter-spacing: .08em; }
+.s10 .p-title { font: 400 3.4rem/1 "Alex Brush", cursive; }
+.s10 .p-title::after { content: "❦"; display: block; font-size: 1.2rem; color: #C9A24A; margin-top: 4px; }
+.s10 .p-text { font-size: 17px; background: #F3E9D6; color: #3a1010; padding: 12px 16px; border: 8px solid; border-image: linear-gradient(135deg, #E6C76A, #C9A24A 40%, #8A6A26 60%, #E6C76A) 1; }
+.s10 .p-ask { font-style: italic; font-size: 17px; }
+.s10 .p-free, .s10 .p-never, .s10 .p-deal { font: 600 15px "Cormorant Garamond", serif; letter-spacing: .08em; font-variant: small-caps; }
+.s10 .p-free { background: transparent; color: #F3E9D6; border: 1px solid #C9A24A; }
+.s10 .p-never { background: linear-gradient(135deg, #E6C76A, #C9A24A 50%, #E6C76A); color: #3a1010; }
+.s10 .p-deal { background: #F3E9D6; color: #3a1010; }
+.s10 .p-amt { font: 600 2rem "Cormorant Garamond", serif; }
+
+/* 11 Luxury typography */
+.s11 .stage { background: #F4F1EA; color: #3A4038; font-family: "Cormorant Garamond", serif; text-align: center; --tr: #B89B5E; --tr-h: 1px; --th: 14px; --th-bg: #3A4038; --th-b: 0; }
+.s11 .p-top { font: 500 10px "Playfair Display", serif; letter-spacing: .24em; text-transform: uppercase; justify-content: center; gap: 24px; }
+.s11 .p-title { line-height: 1; }
+.s11 .p-title .caps { font: 500 1.3rem "Playfair Display", serif; letter-spacing: .18em; text-transform: uppercase; vertical-align: middle; }
+.s11 .p-title .script { font: 400 3.8rem "Pinyon Script", cursive; vertical-align: middle; margin-left: .1em; }
+.s11 .p-text { font-size: 18px; max-width: 34ch; margin-inline: auto; }
+.s11 .p-text::after { content: ""; display: block; width: 56px; height: 1px; background: #B89B5E; margin: 16px auto 0; }
+.s11 .p-ask { font-style: italic; font-weight: 400; font-size: 18px; }
+.s11 .p-free, .s11 .p-never, .s11 .p-deal { font: 500 11px "Playfair Display", serif; letter-spacing: .2em; text-transform: uppercase; }
+.s11 .p-free { background: none; border: 1px solid #3A4038; color: #3A4038; }
+.s11 .p-never { background: #3A4038; color: #F4F1EA; } .s11 .p-deal { background: none; color: #3A4038; border-bottom: 1px solid #B89B5E; }
+.s11 .p-amt { font: 400 2.1rem "Cormorant Garamond", serif; }
+
+/* 12 Y2K */
+.s12 .stage { background: #fff; color: #141414; font-family: "Space Grotesk", sans-serif; background-image: linear-gradient(#E6E6E6 1px, transparent 1px), linear-gradient(90deg, #E6E6E6 1px, transparent 1px); background-size: 24px 24px; --tr: linear-gradient(90deg, #FF5CC8, #5CC8FF); --tr-h: 8px; --tr-r: 99px; --th: 26px; --th-bg: radial-gradient(circle at 35% 30%, #fff 0 20%, #d7d7d7 45%, #8f8f8f); --th-b: 2px solid #141414; }
+.s12 .deco.spray { width: 220px; aspect-ratio: 1; border-radius: 50%; filter: blur(40px); opacity: .45; }
+.s12 .deco.spray.a { background: #FF5CC8; right: -60px; top: -40px; } .s12 .deco.spray.b { background: #5CC8FF; left: -80px; bottom: 20px; }
+.s12 .deco.sticker { right: 18px; top: 64px; z-index: 2; width: 74px; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff9 0 18%, transparent 40%), #FFE45C; display: grid; place-items: center; transform: rotate(-12deg); font: 400 14px "Bungee", sans-serif; box-shadow: 0 8px 20px rgba(0,0,0,.15); }
+.s12 .p-top span { background: #141414; color: #fff; border-radius: 99px; padding: 2px 10px; font-weight: 700; }
+.s12 .p-title { font: 400 2.6rem/.95 "Bungee", sans-serif; background: linear-gradient(180deg, #fff 0%, #c9c9c9 45%, #fff 50%, #8f8f8f 100%); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-stroke: 1.5px #141414; filter: drop-shadow(3px 3px 0 #FF5CC8); max-width: 80%; }
+.s12 .p-free, .s12 .p-never, .s12 .p-deal { font: 700 14px "Space Grotesk", sans-serif; border-radius: 99px; border: 2px solid #141414; background-image: linear-gradient(#fff8, transparent 55%); }
+.s12 .p-free { background-color: #9DF5C8; } .s12 .p-never { background-color: #FF5CC8; } .s12 .p-deal { background-color: #FFE45C; }
+.s12 .p-amt { font-family: "Bungee", sans-serif; }
+
+/* 13 Claymorphism */
+.s13 .stage { background: #EFE9FF; color: #2A1E4F; font-family: "Fredoka", sans-serif; border-radius: 28px; --tr: #C9B8FF; --tr-h: 12px; --tr-r: 99px; --th: 30px; --th-bg: #FFD3B6; --th-b: 0; --th-sh: inset -4px -4px 8px rgba(170,90,40,.25), inset 4px 4px 8px rgba(255,255,255,.8), 4px 6px 12px rgba(120,90,200,.3); --focus: #6b4de0; }
+.s13 .p-top { font-weight: 600; color: #5a4a8a; }
+.s13 .p-title { font: 600 2.4rem/1 "Fredoka", sans-serif; }
+.s13 .p-text { background: #C9B8FF; border-radius: 24px; padding: 16px 18px; font-weight: 500; box-shadow: inset -8px -8px 16px rgba(80,50,140,.18), inset 8px 8px 16px rgba(255,255,255,.7), 10px 14px 28px rgba(120,90,200,.25); }
+.s13 .p-free, .s13 .p-never, .s13 .p-deal { font: 600 15px "Fredoka", sans-serif; border-radius: 22px; color: #2A1E4F; padding: 10px 16px; }
+.s13 .p-free { background: #B8F1D9; box-shadow: inset -5px -5px 10px rgba(30,110,80,.18), inset 5px 5px 10px rgba(255,255,255,.75), 6px 8px 16px rgba(60,160,120,.25); }
+.s13 .p-never { background: #FFB8B8; box-shadow: inset -5px -5px 10px rgba(170,50,50,.18), inset 5px 5px 10px rgba(255,255,255,.75), 6px 8px 16px rgba(220,90,90,.25); }
+.s13 .p-deal { background: #FFD3B6; box-shadow: inset -5px -5px 10px rgba(170,90,40,.18), inset 5px 5px 10px rgba(255,255,255,.75), 6px 8px 16px rgba(220,130,80,.25); }
+.s13 .p-amt { font-weight: 600; }
+
+/* 14 Minimalism */
+.s14 .stage { background: #FAFAF7; color: #0A0A0A; font-family: "Inter Tight", sans-serif; padding: 34px 30px; gap: 16px; --tr: #0A0A0A; --tr-h: 1px; --th: 12px; --th-bg: #0A0A0A; --th-b: 0; --focus: #E10600; }
+.s14 .p-top { color: #6b6b6b; font-size: 13px; }
+.s14 .p-title { font-weight: 450; font-size: 1.9rem; letter-spacing: -.01em; }
+.s14 .p-text { color: #333; max-width: 36ch; }
+.s14 .p-ask { font-weight: 500; }
+.s14 .p-free, .s14 .p-never, .s14 .p-deal { background: none; border: 1px solid #0A0A0A; font-size: 14px; }
+.s14 .p-never::before { content: "●"; color: #E10600; margin-right: 6px; font-size: 10px; vertical-align: 2px; }
+.s14 .p-amt { font-weight: 450; }
+
+/* 15 Bento */
+.s15 .stage { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; background: #F4F3F8; color: #1E1E24; font-family: "Inter Tight", sans-serif; padding: 12px; border-radius: 26px; --tr: #1E1E24; --tr-h: 4px; --tr-r: 9px; --th: 22px; --th-bg: #fff; --th-b: 2px solid #1E1E24; }
+.s15 .stage > * { border-radius: 18px; padding: 14px; margin: 0; }
+.s15 .p-title { grid-column: span 3; background: #E6E1FA; font: 700 1.7rem/1.05 "Inter Tight", sans-serif; display: flex; align-items: flex-end; min-height: 96px; }
+.s15 .p-top { grid-column: span 1; background: #FFE3D3; flex-direction: column; justify-content: space-between; font-weight: 700; }
+.s15 .p-top span:last-child { font-size: 1.6rem; }
+.s15 .p-text { grid-column: span 4; background: #fff; }
+.s15 .p-ask { grid-column: span 4; background: #D7F2E3; }
+.s15 .p-scale { grid-column: span 4; background: #fff; margin: 0; }
+.s15 .p-deal { grid-column: span 4; background: #1E1E24; color: #fff; font-weight: 700; }
+.s15 .p-free { background: #D7F2E3; border-radius: 12px; font-weight: 700; } .s15 .p-never { background: #FFD6D6; border-radius: 12px; font-weight: 700; }
+.s15 .p-amt { font-weight: 700; }
+
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1>Pick a look for Corruption Compass</h1>
+    <p>Fifteen styles, each showing the same offer from the game. The sliders and buttons work, so try them. Press "Choose this style" on the one you want, then paste the copied line into the chat.</p>
+    <div class="legend"><span><b>Scout pick</b> marks the three styles the Style Scout thinks fit the game best.</span><span>Every card carries a fit note and a coach warning.</span></div>
+  </header>
+  <main class="grid" id="grid"></main>
+</div>
+<div id="toast" role="status" hidden></div>
+
+<script>
+(() => {
+  const STYLES = [
+    { name: "Neo-brutalism", deco: "", pick: true,
+      fit: "Loud and game-like. The hard shadow that presses in on click suits a Deal or Never decision.",
+      warn: "Easy to slide into generic indie-app looks. Keep it to three flat colours." },
+    { name: "Swiss", title: "The<span>scaffold</span>",
+      fit: "Deadpan and official, like a government integrity survey. The seriousness makes the offers hit harder.",
+      warn: "The least playful option. It needs the big type scale or it reads as a form." },
+    { name: "Tabloid editorial", title: "The <span>scaffold</span>", deco: '<div class="deco note">€100?!</div>', pick: true,
+      fit: "Corruption is a front-page scandal. The result screen could be a headline such as COOK SELLS OUT FOR €100.",
+      warn: "There are no photos to carry it, so the headline has to. Keep the two-column text large enough on phones." },
+    { name: "Evidence board", deco: '<div class="deco pin"></div>', pick: true,
+      fit: "Each offer is pinned up like evidence against you: taped notes, a red stamp for Never.",
+      warn: "Tilted text is harder to read. Tilt only the stamps and tags, never the scenario." },
+    { name: "Cybercore dossier",
+      fit: "File numbers and harm scores are real content here, so the metadata look has something to show.",
+      warn: "Cold. It fits the spy offer better than the supermarket one." },
+    { name: "Cyberpunk", deco: '<div class="deco trace"></div>',
+      fit: "Back-alley deals at night, with Never as the one lit-up choice.",
+      warn: "Neon on black tires the eyes over ten offers. Glow effects must keep 4.5:1 contrast." },
+    { name: "Synthwave", deco: '<div class="deco sun"></div><div class="deco floor"></div>',
+      fit: "Fun, retro and made for sharing.",
+      warn: "The look has nothing to do with corruption, and the sun competes with the scenario text." },
+    { name: "Pixel arcade", deco: '<div class="deco dither"></div>',
+      fit: "Turns it into an arcade game. Prices could become coins and the result a high-score screen.",
+      warn: "Pixel fonts are hard work for long text. Only the titles are pixel type here." },
+    { name: "Maximalism", deco: '<div class="deco anchor">Sold?</div>',
+      fit: "Chaotic, funny and meme-ready, with the offer in a fake desktop window.",
+      warn: "Busy behind questions about people getting killed, and crowded on a phone." },
+    { name: "Victorian", title: "The Scaffold",
+      fit: "Old money and bribery: gilt frames, like a banker's portrait.",
+      warn: "Script titles are hard to read, and the heavy red dominates every screen." },
+    { name: "Luxury typography", title: '<span class="caps">The</span><span class="script">Scaffold</span>',
+      fit: "A private-banker voice makes a bribe sound elegant. The irony is the point.",
+      warn: "Thin serif and gold on cream risk contrast, and it feels less like a game." },
+    { name: "Y2K", deco: '<div class="deco spray a"></div><div class="deco spray b"></div><div class="deco sticker">€100!</div>',
+      fit: "Playful and made for social sharing.",
+      warn: "Chrome and candy clash with the grim scenarios. Gradient text is hard to read at small sizes." },
+    { name: "Claymorphism",
+      fit: "Toy-like and friendly. It is ironic next to poisoned streams and missing scaffold ties.",
+      warn: "Soft shadows on pale lilac need care to keep text and buttons distinct." },
+    { name: "Minimalism",
+      fit: "Nothing distracts from the question. The price is the only large thing on screen.",
+      warn: "Loses the game feeling. The single red dot on Never has to carry the whole identity." },
+    { name: "Bento grid",
+      fit: "The tiles suit the result screen well: your type, your price, the other players' dots.",
+      warn: "The question screen gets boxy, with a tile for everything." }
+  ];
+
+  const LADDER = [];
+  for (let e = 1; e <= 7; e++) for (const m of [1, 1.5, 2, 3, 5, 7.5]) LADDER.push(Math.round(m * 10 ** e));
+  LADDER.push(1e8);
+  const START = LADDER.indexOf(100);
+  const fmt = (v) => v >= 1e6 ? `€${+(v / 1e6).toFixed(1)} million` : "€" + v.toLocaleString("en-GB");
+
+  const grid = document.getElementById("grid");
+  STYLES.forEach((s, i) => {
+    const n = String(i + 1).padStart(2, "0");
+    const art = document.createElement("article");
+    art.className = `opt s${i + 1}`;
+    art.innerHTML = `
+      <div class="meta"><span class="num">${n}</span><h2>${s.name}</h2>${s.pick ? '<span class="badge">Scout pick</span>' : ""}</div>
+      <div class="stage">
+        ${s.deco || ""}
+        <div class="p-top"><span>Offer 10 of 10</span><span>Harm 5/5</span></div>
+        <h3 class="p-title">${s.title || "The scaffold"}</h3>
+        <p class="p-text">Half its ties are missing. Forty workers climb it on Monday. The site manager slides an envelope across the table.</p>
+        <p class="p-ask">What has to be in the envelope?</p>
+        <div class="p-scale">
+          <button class="p-free" type="button">For free</button>
+          <div class="p-mid"><output class="p-amt">€100</output><input type="range" id="range-${n}" min="0" max="${LADDER.length - 1}" value="${START}" aria-label="Price in the ${s.name} preview"></div>
+          <button class="p-never" type="button">Never</button>
+        </div>
+        <button class="p-deal" type="button">Deal at €100</button>
+      </div>
+      <dl class="notes"><div><dt>Fit</dt><dd>${s.fit}</dd></div><div><dt>Watch out</dt><dd>${s.warn}</dd></div></dl>
+      <button class="choose" type="button" id="choose-${n}">Choose this style</button>`;
+    grid.appendChild(art);
+    const range = art.querySelector("input");
+    const out = art.querySelector(".p-amt");
+    const deal = art.querySelector(".p-deal");
+    range.addEventListener("input", () => { const v = fmt(LADDER[+range.value]); out.textContent = v; deal.textContent = `Deal at ${v}`; range.setAttribute("aria-valuetext", v); });
+    range.setAttribute("aria-valuetext", "€100");
+    art.querySelector(".choose").addEventListener("click", (e) => choose(`Style ${n}: ${s.name}`, e.currentTarget));
+  });
+
+  const toast = document.getElementById("toast");
+  let tt;
+  function say(msg) { toast.textContent = msg; toast.hidden = false; clearTimeout(tt); tt = setTimeout(() => { toast.hidden = true; }, 4000); }
+  function choose(line, btn) {
+    document.querySelectorAll(".choose.done").forEach(b => { b.classList.remove("done"); b.textContent = "Choose this style"; });
+    btn.classList.add("done"); btn.textContent = "Chosen";
+    try {
+      navigator.clipboard.writeText(line).then(() => say(`Copied "${line}". Paste it into the chat.`), () => say(`Tell Claude: ${line}`));
+    } catch (e) { say(`Tell Claude: ${line}`); }
+  }
+})();
+</script>

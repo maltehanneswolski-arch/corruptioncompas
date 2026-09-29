@@ -1,0 +1,796 @@
+<title>Corruption Compass</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Silkscreen&family=VT323&display=swap">
+<style>
+/* Layout: pixel arcade on an 8px grid. One column, stepped-corner panels, bitmap display type, a spinning pixel coin as the mark. Single light look by choice. */
+:root {
+  --paper: #DDEBF7;
+  --paper-2: #CFE2F3;
+  --ink: #1A1A1A;
+  --ink-soft: #3F4A55;
+  --rule: #A9C4DB;
+  --blue: #4B3BFF;
+  --pink: #FF5CA8;
+  --green: #5CE1A0;
+  --yellow: #FFD23F;
+  --q-clean: #E1DCFF;
+  --q-merc: #FFF0B8;
+  --q-fixer: #D3F5E4;
+  --q-villain: #FFD3E6;
+  --crowd: #5F7488;
+  --display: "Press Start 2P", "Silkscreen", monospace;
+  --label: "Silkscreen", "VT323", monospace;
+  --body: "VT323", ui-monospace, Consolas, monospace;
+  --step: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px);
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 22px;
+  line-height: 1.15;
+  padding-inline: 16px;
+  padding-block: 0 48px;
+  image-rendering: pixelated;
+}
+.wrap { max-width: 704px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 48px; }
+
+/* Masthead */
+header.mast { position: relative; padding-block: 48px 32px; display: grid; gap: 16px; }
+header.mast::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: var(--ink); }
+h1 { font: 48px/1.2 var(--display); color: var(--blue); margin: 0; letter-spacing: 0; }
+.cursor { display: inline-block; width: .5em; height: .8em; margin-left: .15em; background: var(--pink); vertical-align: -2px; animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { visibility: hidden; } }
+#coin { position: absolute; right: 0; top: 32px; width: 64px; height: 64px; image-rendering: pixelated; }
+.lede { margin: 0; max-width: 56ch; }
+.mast.compact { padding-block: 16px 24px; gap: 8px; }
+.mast.compact h1 { font-size: 24px; }
+.mast.compact .lede { display: none; }
+.mast.compact #coin { width: 32px; height: 32px; top: 8px; }
+
+/* Screens */
+section[data-screen] { display: grid; grid-template-columns: minmax(0, 1fr); gap: 32px; }
+.eyebrow { font: 16px/1 var(--label); text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+
+h2 { font: 32px/1.25 var(--display); margin: 0; }
+.qhead { display: flex; align-items: center; gap: 16px; }
+#qIcon { width: 48px; height: 48px; flex: none; image-rendering: pixelated; }
+.scenario { margin: 0; font-size: 24px; max-width: 60ch; }
+.ask { margin: 0; font-size: 24px; color: var(--blue); }
+.ask::before { content: "> "; }
+
+.panel { border: 4px solid var(--ink); clip-path: var(--step); background: var(--paper-2); padding: 16px; }
+
+/* Price scale: Free | slider | Never */
+.scale { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "free slide never"; gap: 24px; align-items: stretch; padding-top: 8px; }
+.px-btn {
+  font: 16px/1.2 var(--label);
+  text-transform: uppercase;
+  color: var(--ink);
+  border: 4px solid var(--ink);
+  clip-path: var(--step);
+  padding: 12px 16px;
+  min-height: 48px;
+  cursor: pointer;
+  background: var(--paper);
+}
+.px-btn:hover { background: var(--ink); color: var(--paper); }
+.px-btn:active { transform: translate(0, 4px); }
+.px-btn:focus-visible, input[type=range]:focus-visible, .link:focus-visible { outline: 4px solid var(--blue); outline-offset: 4px; }
+.px-btn.free { grid-area: free; background: var(--green); }
+.px-btn.never { grid-area: never; background: var(--pink); }
+.px-btn.deal { background: var(--yellow); justify-self: center; }
+.px-btn.free:hover, .px-btn.never:hover, .px-btn.deal:hover { background: var(--ink); color: var(--paper); }
+.px-btn.picked { background: var(--ink); color: var(--yellow); }
+.end { min-width: 120px; display: flex; flex-direction: column; justify-content: center; gap: 8px; text-align: center; }
+.end small { font: 20px/1 var(--body); text-transform: none; }
+
+.slide { grid-area: slide; display: grid; gap: 16px; min-width: 0; align-content: center; }
+.readout { display: flex; justify-content: center; align-items: center; gap: 4px; font: 24px/1.2 var(--display); }
+#amount { font: inherit; width: 100%; max-width: 11ch; min-height: 48px; padding: 4px 8px; background: var(--paper-2); color: var(--ink); border: 0; border-bottom: 4px solid var(--ink); text-align: left; -moz-appearance: textfield; }
+#amount::-webkit-outer-spin-button, #amount::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+#amount:focus-visible { outline: 4px solid var(--blue); outline-offset: 4px; }
+input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 48px; background: transparent; margin: 0; cursor: pointer; }
+input[type=range]::-webkit-slider-runnable-track { height: 8px; background: var(--ink); }
+input[type=range]::-moz-range-track { height: 8px; background: var(--ink); }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 32px; margin-top: -12px; background: var(--blue); border: 4px solid var(--ink); border-radius: 0; }
+input[type=range]::-moz-range-thumb { width: 16px; height: 24px; background: var(--blue); border: 4px solid var(--ink); border-radius: 0; }
+
+.nav { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.link { font: 16px/1 var(--label); text-transform: uppercase; background: none; border: 0; padding: 16px 0; min-height: 48px; color: var(--blue); cursor: pointer; }
+.link:hover { color: var(--pink); }
+.link:disabled { color: var(--rule); cursor: default; }
+
+/* Intro */
+.actions { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+.hint, .fine { margin: 0; color: var(--ink-soft); }
+
+/* Result */
+.result-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 40px; align-items: start; }
+.compass { width: 100%; max-width: 100%; height: auto; display: block; shape-rendering: crispEdges; }
+.compass text { font-family: var(--label); fill: var(--ink-soft); }
+.verdict { display: grid; gap: 24px; min-width: 0; }
+.badge { justify-self: start; font: 16px/1 var(--label); text-transform: uppercase; background: var(--pink); padding: 8px 12px; clip-path: var(--step); }
+.verdict .type { font: 24px/1.35 var(--display); color: var(--blue); margin: 0; }
+.verdict p { margin: 0; }
+.coords { color: var(--ink-soft); }
+.crowd-note b { color: var(--blue); font-weight: 400; }
+
+.receipt { border-top: 4px solid var(--ink); padding-top: 24px; }
+.receipt h3 { font: 16px/1 var(--label); text-transform: uppercase; margin: 0 0 16px; }
+.receipt-scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; min-width: 440px; }
+td, th { padding: 8px; border-bottom: 2px dashed var(--rule); text-align: left; vertical-align: middle; }
+th { font: 16px/1 var(--label); text-transform: uppercase; color: var(--ink-soft); font-weight: 400; }
+td.num, th.num { text-align: right; white-space: nowrap; }
+.hb { display: inline-block; width: 8px; height: 8px; margin-right: 4px; background: var(--rule); }
+.hb.on { background: var(--pink); }
+.tag { font: 16px/1 var(--label); text-transform: uppercase; padding: 4px 8px; display: inline-block; }
+.tag.free { background: var(--green); }
+.tag.never { background: var(--pink); }
+tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px; }
+#rTotal { font: 16px/1.2 var(--display); }
+#copyNote { color: var(--ink-soft); }
+#shareText { font: 20px var(--body); width: 100%; background: var(--paper-2); color: var(--ink); border: 4px solid var(--ink); padding: 8px; resize: none; }
+
+@keyframes pinblink { 0%, 100% { visibility: visible; } 50% { visibility: hidden; } }
+.pin { animation: pinblink .3s steps(1) 4; }
+
+@media (max-width: 640px) {
+  .result-grid { grid-template-columns: minmax(0, 1fr); }
+  h2 { font-size: 24px; }
+  #qIcon { width: 32px; height: 32px; }
+}
+@media (max-width: 560px) {
+  h1 { font-size: 32px; }
+  #coin { width: 32px; height: 32px; top: 32px; }
+  .scale { grid-template-columns: 1fr 1fr; grid-template-areas: "free never" "slide slide"; }
+  .end { min-width: 0; }
+  .readout { font-size: 16px; }
+  #amount { max-width: 14ch; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <h1>Corruption<br>Compass<span class="cursor" aria-hidden="true"></span></h1>
+    <canvas id="coin" width="16" height="16" aria-hidden="true"></canvas>
+    <p class="lede">Answer ten questions to find out how corrupt you are.</p>
+  </header>
+
+  <!-- Intro -->
+  <section data-screen="intro" id="s-intro">
+    <div class="actions">
+      <button class="px-btn deal" id="startBtn" type="button">Press start</button>
+    </div>
+    <p class="fine">Answer the way you would act. It is anonymous (I promise). When you finish, you can see how corrupt you are on an X-Y diagram.</p>
+  </section>
+
+  <!-- Question -->
+  <section data-screen="q" id="s-q" hidden>
+    <div class="eyebrow">
+      <span id="qCount">Level 01/10</span>
+    </div>
+    <h2 class="qhead"><canvas id="qIcon" width="16" height="16" aria-hidden="true"></canvas><span id="qTitle"></span></h2>
+    <p class="scenario" id="qText"></p>
+    <p class="ask" id="qAsk"></p>
+    <div class="scale" role="group" aria-labelledby="qAsk">
+      <button class="px-btn free end" id="freeBtn" type="button">For free<small>as a favour</small></button>
+      <div class="slide">
+        <label class="readout" for="amount"><span aria-hidden="true">€</span><input type="number" id="amount" min="1" step="1" value="100" inputmode="numeric" aria-label="Your price in euros"></label>
+        <input type="range" id="price" min="0" max="42" step="1" value="6" aria-label="Your price" aria-valuetext="€100">
+        <button class="px-btn deal" id="takeBtn" type="button">Deal at €100</button>
+      </div>
+      <button class="px-btn never end" id="neverBtn" type="button">Never<small>not for any price</small></button>
+    </div>
+    <div class="nav">
+      <button class="link" id="backBtn" type="button">&lt; Back</button>
+      <button class="link" id="restartBtn1" type="button">Restart</button>
+    </div>
+  </section>
+
+  <!-- Result -->
+  <section data-screen="result" id="s-result" hidden>
+    <div class="eyebrow"><span>Game over</span></div>
+    <div class="result-grid">
+      <svg class="compass" id="compass" viewBox="0 0 416 416" role="img" aria-labelledby="compassTitle">
+        <title id="compassTitle">Your position on the Corruption Compass</title>
+      </svg>
+      <div class="verdict">
+        <span class="badge" id="rStamp">Filed</span>
+        <p class="type" id="rType"></p>
+        <p id="rBlurb"></p>
+        <p class="coords" id="rCoords"></p>
+        <p class="crowd-note" id="crowdNote" hidden></p>
+        <p class="fine">Blue squares are rough guesses for twenty famous names, based on their public record. For comparison only.</p>
+      </div>
+    </div>
+
+    <div class="receipt">
+      <h3>Your price list</h3>
+      <div class="receipt-scroll">
+        <table>
+          <thead><tr><th>Offer</th><th>Harm</th><th class="num">Your price</th></tr></thead>
+          <tbody id="rRows"></tbody>
+          <tfoot><tr><td colspan="2">Everything you would sell, sold at once</td><td class="num" id="rTotal"></td></tr></tfoot>
+        </table>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="px-btn deal" id="copyBtn" type="button">Copy my result</button>
+      <button class="px-btn" id="restartBtn2" type="button">Play again</button>
+      <span id="copyNote" aria-live="polite"></span>
+    </div>
+    <textarea id="shareText" rows="2" readonly hidden aria-label="Result text to copy"></textarea>
+  </section>
+</div>
+
+<script>
+(() => {
+  const QUESTIONS = [
+    { harm: 4, title: "Weapons manufacturing", icon: "missile",
+      text: "You are a software engineer. A weapons manufacturer wants you to improve the guidance system on a missile. Its biggest customer is a regime that bombs residential districts. Better guidance means more hits.",
+      ask: "What salary makes you sign?" },
+    { harm: 3, title: "Snitches get stitches", icon: "file",
+      text: "Someone leaked proof of your company's safety violations to the press. The access logs tell you who it was: a colleague you like, though not a friend. Legal wants the name. The colleague will be fired and sued.",
+      ask: "What bonus would get you to hand over the name?" },
+    { harm: 5, title: "A killer bonus", icon: "car",
+      text: "You work at a car maker. Your report shows a steering fault that will kill about ten drivers a year. A recall would cost the company a fortune. Your manager offers you a bonus to leave the report in your drawer.",
+      ask: "How big a bonus?" },
+    { harm: 4, title: "Selling out your people", icon: "spy",
+      text: "At work, a diplomat from a country hostile to yours starts talking to you. They want copies of your employer's internal documents every month, paid into an account abroad.",
+      ask: "For how much do you turn?" },
+    { harm: 2, title: "The will", icon: "will",
+      text: "You look after an elderly woman with dementia. Her nephew asks you to witness a new will that leaves him everything and her grandchildren nothing. She would sign whatever you put in front of her.",
+      ask: "What cut do you want?" },
+    { harm: 5, title: "Propaganda minister", icon: "megaphone",
+      text: "Suddenly your skills are exactly what propaganda needs. A party from the opposite end of the political spectrum wants to hire you. Your work would help their propaganda and, at worst, get people hurt or killed.",
+      ask: "What would the salary have to be before you consider it?" },
+    { harm: 3, title: "Hit-and-run", icon: "cheque",
+      text: "Late one night the son of a rich business family knocks a cyclist off her bike and drives away. She survives with a shattered leg. The family owns half the town and holds two seats in parliament. They ask you to tell the police the boy was at your place all evening.",
+      ask: "How much do they have to write on the cheque?" },
+    { harm: 4, title: "Smuggling", icon: "lorry",
+      text: "You drive a refrigerated lorry across borders. A man offers you cash to smuggle twelve migrants, alive and hidden in the back, on your next run. The trailer is airtight. Last year a group like that suffocated before the lorry reached the coast.",
+      ask: "How much cash?" },
+    { harm: 3, title: "For mother nature", icon: "drum",
+      text: "You drive a waste truck. Your boss tells you to skip the licensed tip and empty forty drums of solvent into a quarry outside town. The quarry drains into a stream. Nobody has been caught yet.",
+      ask: "What would the boss have to pay on top of your wage?" },
+    { harm: 5, title: "Witness", icon: "eye",
+      text: "You are the only person who saw a police officer shoot an unarmed man in a car park. The officer's union offers you money to say you saw a gun. If you take it, the man's family gets nothing and the officer goes back on patrol.",
+      ask: "What has to be in the envelope?" }
+  ];
+
+  // Price ladder for the slider: €10 to €100 million, in round steps.
+  const LADDER = [];
+  for (let e = 1; e <= 7; e++) for (const m of [1, 1.5, 2, 3, 5, 7.5]) LADDER.push(Math.round(m * 10 ** e));
+  LADDER.push(1e8);                                  // 43 steps, index 0..42
+  const START = LADDER.indexOf(100);
+
+  const TYPES = {
+    saint: { name: "The Saint", stamp: "Ten refusals",
+      blurb: "You refused every single offer. Either you are a saint, or you know this is a game. Nobody will ever bribe you, and nobody will ever invite you to the fun parties." },
+    incorruptible: { name: "The Incorruptible", stamp: "Not for sale",
+      blurb: "Few offers tempt you, and the ones that do cost a fortune. Every workplace needs people like you. That is also why people like you get approached first." },
+    immovable: { name: "The Immovable", stamp: "Ask someone else",
+      blurb: "You said no to nearly everything, and the one thing you would consider costs more than the offer is worth. Governments put people like you in charge of the audit office." },
+    mercenary: { name: "The Mercenary", stamp: "Expensive",
+      blurb: "You would do almost anything. You just charge a lot for it. The high price keeps you out of most trouble, and anyone who can afford you owns you." },
+    oligarch: { name: "The Oligarch", stamp: "Seven figures",
+      blurb: "Nothing is sacred and nothing is cheap. Missiles, migrants, dead drivers: fine, once the money clears. You are what every sanctions list is trying to describe." },
+    fixer: { name: "The Petty Fixer", stamp: "Small change",
+      blurb: "You would never hurt anyone badly. You would witness a dodgy will or lie to the police for pocket money. Most corruption in the world is this small and this cheap." },
+    pushover: { name: "The Pushover", stamp: "As a favour",
+      blurb: "You only do the small wrongs, but you do them for nothing. You are not corrupt so much as unable to say no to a friend. Friends have noticed." },
+    villain: { name: "The Bargain Villain", stamp: "Clearance sale",
+      blurb: "Almost anything is on the table, and the table is cheap. Nobody needs a spy agency to buy you. A stranger with an envelope would do." },
+    devil: { name: "The Discount Devil", stamp: "Everything must go",
+      blurb: "You would sell out a whole town for the price of a used car. The worst part is not what you would do. It is how little it takes." },
+    negotiator: { name: "The Negotiator", stamp: "Terms apply",
+      blurb: "You have a line and a price, and both move depending on who asks. Rulebooks and cameras exist because of people like you." }
+  };
+
+  const HARM_TOTAL = QUESTIONS.reduce((s, q) => s + q.harm, 0);
+  const $ = (id) => document.getElementById(id);
+  const fmtEUR = (v) => "€" + v.toLocaleString("en-GB");
+  const fmtShort = (v) => v >= 1e6 ? `€${+(v / 1e6).toFixed(1)} million` : fmtEUR(v);
+  const nearestStep = (v) => { let best = 0; for (let k = 1; k < LADDER.length; k++) if (Math.abs(Math.log10(LADDER[k]) - Math.log10(v)) < Math.abs(Math.log10(LADDER[best]) - Math.log10(v))) best = k; return best; };
+
+  // answer: null (unanswered) | { kind: "free" } | { kind: "never" } | { kind: "price", value }  (value in euros, typed or from the slider)
+  const blank = () => ({ screen: "intro", i: 0, answers: Array(QUESTIONS.length).fill(null) });
+  let state = blank();
+
+  const priceOf = (a) => a.kind === "free" ? 0 : a.value;
+
+  /* ---------- Scoring (pure) ---------- */
+  // Cheapness per accepted offer: free = 1, €10 or less ≈ 0.95, €100 million or more = 0.
+  function cheapness(a) {
+    if (a.kind === "free") return 1;
+    const lg = Math.min(8, Math.max(1, Math.log10(a.value)));
+    return 0.95 * (8 - lg) / 7;
+  }
+  function score(answers) {
+    let harmTaken = 0, cheapSum = 0, taken = 0, total = 0;
+    answers.forEach((a, idx) => {
+      if (!a || a.kind === "never") return;
+      harmTaken += QUESTIONS[idx].harm;
+      cheapSum += cheapness(a);
+      taken++;
+      total += priceOf(a);
+    });
+    const x = +((harmTaken / HARM_TOTAL) * 20 - 10).toFixed(1);          // -10 clean … +10 dirty
+    const y = +((taken ? cheapSum / taken : 0) * 20 - 10).toFixed(1);    // -10 priceless … +10 free
+    return { x, y, type: taken ? zone(x, y) : "saint", taken, total };
+  }
+  function zone(x, y) {
+    if (Math.abs(x) < 3.5 && Math.abs(y) < 3.5) return "negotiator";
+    const deep = Math.abs(x) > 6.5 && Math.abs(y) > 6.5;
+    if (x < 0 && y < 0) return deep ? "immovable" : "incorruptible";
+    if (x >= 0 && y < 0) return deep ? "oligarch" : "mercenary";
+    if (x < 0) return deep ? "pushover" : "fixer";
+    return deep ? "devil" : "villain";
+  }
+
+  /* ---------- Screens ---------- */
+  function show(screen) {
+    state.screen = screen;
+    document.querySelector(".mast").classList.toggle("compact", screen !== "intro");
+    for (const s of document.querySelectorAll("section[data-screen]")) s.hidden = s.dataset.screen !== screen;
+    if (screen === "q") renderQuestion();
+    if (screen === "result") renderResult();
+  }
+
+  let current = 100;
+  function setPrice(v, from) {
+    current = Math.max(1, Math.round(v));
+    if (from !== "amount") $("amount").value = current;
+    if (from !== "slider") $("price").value = nearestStep(current);
+    $("price").setAttribute("aria-valuetext", fmtShort(current));
+    $("takeBtn").textContent = `Deal at ${fmtShort(current)}`;
+  }
+
+  function renderQuestion() {
+    const q = QUESTIONS[state.i];
+    const a = state.answers[state.i];
+    $("qCount").textContent = `Level ${String(state.i + 1).padStart(2, "0")}/${QUESTIONS.length}`;
+    $("qTitle").textContent = q.title;
+    drawIcon($("qIcon"), ICONS[q.icon]);
+    $("qText").textContent = q.text;
+    $("qAsk").textContent = q.ask;
+    setPrice(a && a.kind === "price" ? a.value : 100);
+    $("freeBtn").classList.toggle("picked", !!a && a.kind === "free");
+    $("neverBtn").classList.toggle("picked", !!a && a.kind === "never");
+    $("backBtn").disabled = state.i === 0;
+  }
+
+  function answer(a) {
+    state.answers[state.i] = a;
+    if (state.i < QUESTIONS.length - 1) { state.i++; show("q"); }
+    else { show("result"); saveResult(score(state.answers)); }
+    window.scrollTo({ top: 0 });
+  }
+
+  /* ---------- Compass (pixel grid: 20 units of 16px) ---------- */
+  const P0 = 48, U = 16, S = 20 * U;
+  const px = (v) => P0 + (v + 10) * U;
+  function renderCompass(r) {
+    const svg = $("compass");
+    const ns = "http://www.w3.org/2000/svg";
+    const el = (tag, attrs, text, parent = svg) => {
+      const e = document.createElementNS(ns, tag);
+      for (const k in attrs) e.setAttribute(k, attrs[k]);
+      if (text != null) e.textContent = text;
+      parent.appendChild(e);
+      return e;
+    };
+    [...svg.querySelectorAll(":scope > :not(title)")].forEach(n => n.remove());
+
+    [["--q-clean", 0, 0], ["--q-merc", 1, 0], ["--q-fixer", 0, 1], ["--q-villain", 1, 1]].forEach(([c, i, j]) =>
+      el("rect", { x: P0 + i * S / 2, y: P0 + j * S / 2, width: S / 2, height: S / 2, style: `fill: var(${c})` }));
+    for (let k = 1; k < 20; k++) {
+      if (k === 10) continue;
+      const p = P0 + k * U;
+      el("rect", { x: p, y: P0, width: 1, height: S, style: "fill: var(--rule)" });
+      el("rect", { x: P0, y: p, width: S, height: 1, style: "fill: var(--rule)" });
+    }
+    el("rect", { x: P0 + S / 2 - 1, y: P0, width: 2, height: S, style: "fill: var(--ink)" });
+    el("rect", { x: P0, y: P0 + S / 2 - 1, width: S, height: 2, style: "fill: var(--ink)" });
+    el("rect", { x: P0 - 2, y: P0 - 2, width: S + 4, height: S + 4, style: "fill: none; stroke: var(--ink); stroke-width: 4" });
+    el("rect", { x: px(-3.5), y: px(-3.5), width: 7 * U, height: 7 * U,
+      style: "fill: none; stroke: var(--ink-soft); stroke-width: 2; stroke-dasharray: 4 4" });
+
+    const qn = (x, y, t, anchor) => el("text", { x, y, "font-size": 12, "text-anchor": anchor, style: "fill: var(--ink)" }, t);
+    qn(P0 + 8, P0 + 20, "INCORRUPTIBLE", "start");
+    qn(P0 + S - 8, P0 + 20, "MERCENARY", "end");
+    qn(P0 + 8, P0 + S - 10, "PETTY FIXER", "start");
+    qn(P0 + S - 8, P0 + S - 10, "BARGAIN VILLAIN", "end");
+
+    const lab = (x, y, t, rot) => el("text", { x, y, "font-size": 14, "text-anchor": "middle",
+      transform: rot ? `rotate(${rot} ${x} ${y})` : "" }, t);
+    lab(208, 32, "PRICELESS");
+    lab(208, 400, "FREE");
+    lab(28, 208, "CLEAN HANDS", -90);
+    lab(388, 208, "DIRTY HANDS", 90);
+
+    for (const f of FIGURES) {
+      const fx = Math.round(px(f.x)), fy = Math.round(px(f.y));
+      el("rect", { x: fx - 5, y: fy - 5, width: 10, height: 10, style: "fill: var(--blue)" });
+      el("rect", { x: fx - 3, y: fy - 3, width: 6, height: 6, style: "fill: var(--paper)" });
+      const left = f.x > 4;
+      el("text", { x: left ? fx - 9 : fx + 9, y: fy + 4, "font-size": 10, "text-anchor": left ? "end" : "start", style: "fill: var(--ink)" }, f.name.toUpperCase());
+    }
+    el("g", { id: "crowdLayer" });
+    const cx = Math.round(px(r.x)), cy = Math.round(px(r.y));
+    el("rect", { x: cx - 1, y: P0, width: 2, height: S, style: "fill: var(--pink)" });
+    el("rect", { x: P0, y: cy - 1, width: S, height: 2, style: "fill: var(--pink)" });
+    const pin = el("g", { class: "pin" });
+    el("rect", { x: cx - 10, y: cy - 10, width: 20, height: 20, style: "fill: var(--ink)" }, null, pin);
+    el("rect", { x: cx - 6, y: cy - 6, width: 12, height: 12, style: "fill: var(--pink)" }, null, pin);
+    el("title", {}, `You: ${r.x}, ${r.y}`, pin);
+    const right = cx > 300;
+    const ly = cy < 80 ? cy + 30 : cy - 16;
+    el("rect", { x: right ? cx - 52 : cx + 14, y: ly - 14, width: 38, height: 18, style: "fill: var(--paper)" });
+    el("text", { x: right ? cx - 33 : cx + 33, y: ly, "font-size": 14, "text-anchor": "middle", style: "fill: var(--ink)" }, "YOU");
+  }
+
+  const harmBoxes = (h) => Array.from({ length: 5 }, (_, k) => `<i class="hb${k < h ? " on" : ""}"></i>`).join("");
+  const signed = (n) => (n > 0 ? "+" : "") + n;
+
+  function renderResult() {
+    const r = score(state.answers);
+    const t = TYPES[r.type];
+    renderCompass(r);
+    drawCrowd();
+    startCrowd();
+    $("rType").textContent = t.name;
+    $("rStamp").textContent = t.stamp;
+    $("rBlurb").textContent = t.blurb;
+    $("rCoords").textContent = `Hands ${signed(r.x)} (${r.x < 0 ? "clean" : "dirty"} side) · Price ${signed(r.y)} (${r.y < 0 ? "pricey" : "cheap"} side) · You would take ${r.taken} of ${QUESTIONS.length} offers.`;
+
+    $("rRows").innerHTML = QUESTIONS.map((q, k) => {
+      const a = state.answers[k];
+      let cell;
+      if (!a || a.kind === "never") cell = `<span class="tag never">Never</span>`;
+      else if (a.kind === "free") cell = `<span class="tag free">Free</span>`;
+      else cell = fmtShort(a.value);
+      return `<tr><td>${q.title}</td><td aria-label="Harm ${q.harm} of 5">${harmBoxes(q.harm)}</td><td class="num">${cell}</td></tr>`;
+    }).join("");
+    $("rTotal").textContent = fmtEUR(r.total);
+
+    $("shareText").value = `I'm ${t.name} on the Corruption Compass (hands ${signed(r.x)}, price ${signed(r.y)}). I'd take ${r.taken} of 10 offers. Where do you land?`;
+    $("copyNote").textContent = "";
+    $("shareText").hidden = true;
+  }
+
+  function restart() {
+    state = blank();
+    show("q");
+  }
+
+  /* ---------- Wiring ---------- */
+  $("startBtn").addEventListener("click", () => show("q"));
+  $("freeBtn").addEventListener("click", () => answer({ kind: "free" }));
+  $("neverBtn").addEventListener("click", () => answer({ kind: "never" }));
+  const deal = () => answer({ kind: "price", value: current });
+  $("takeBtn").addEventListener("click", deal);
+  $("price").addEventListener("input", (e) => setPrice(LADDER[+e.target.value], "slider"));
+  $("amount").addEventListener("input", (e) => { const v = +e.target.value; if (v >= 1) setPrice(v, "amount"); });
+  $("amount").addEventListener("blur", () => setPrice(current));
+  for (const id of ["price", "amount"]) $(id).addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); deal(); } });
+  $("backBtn").addEventListener("click", () => { if (state.i > 0) { state.i--; show("q"); } });
+  $("restartBtn1").addEventListener("click", restart);
+  $("restartBtn2").addEventListener("click", restart);
+  $("copyBtn").addEventListener("click", () => {
+    const text = $("shareText").value;
+    const fallback = () => {
+      const ta = $("shareText");
+      ta.hidden = false; ta.focus(); ta.select();
+      $("copyNote").textContent = "Copying is blocked here. The text is selected, so press Ctrl+C.";
+    };
+    try {
+      navigator.clipboard.writeText(text).then(() => { $("copyNote").textContent = "Copied to clipboard."; }, fallback);
+    } catch (e) { fallback(); }
+  });
+
+
+  /* ---------- Pixel icons (16x16; . empty, k ink, b blue, p pink, y yellow, g green, w paper) ---------- */
+  const ICONS = {
+    missile: [
+      "................",
+      "..........kk....",
+      ".........kyyk...",
+      "........kyyyyk..",
+      ".......kyyyyk...",
+      "......kyyyyk....",
+      ".....kyyyyk.....",
+      "....kkyyyk......",
+      "...kpkyyk.......",
+      "..kppkyk........",
+      ".kpppkk.........",
+      "kppppk..........",
+      ".kkkk...........",
+      "................",
+      "................",
+      "................"],
+    file: [
+      "................",
+      "...kkkkkkkk.....",
+      "...kwwwwwwkk....",
+      "...kwwwwwwkwk...",
+      "...kwwwwwwkkkk..",
+      "...kwkkkkwwwwk..",
+      "...kwwwwwwwwwk..",
+      "...kwkkkkkkwwk..",
+      "...kwwwwwwwwwk..",
+      "...kwkkkkkkwwk..",
+      "...kwwwwwwwwwk..",
+      "...kwkkkkwwwwk..",
+      "...kwwwwwwwwwk..",
+      "...kkkkkkkkkkk..",
+      "......pppp......",
+      "................"],
+    car: [
+      "................",
+      "................",
+      "................",
+      ".....kkkkkk.....",
+      "....kppppppk....",
+      "...kpwwppwwpk...",
+      "..kppwwppwwppk..",
+      ".kppppppppppppk.",
+      ".kppppppppppppk.",
+      ".kkkkkkkkkkkkkk.",
+      "..kkwwkkkkwwkk..",
+      "..kwkkwkkwkkwk..",
+      "..kkwwkkkkwwkk..",
+      "...kkk....kkk...",
+      "................",
+      "................"],
+    spy: [
+      "................",
+      "......kkkk......",
+      ".....kkkkkk.....",
+      ".....kkkkkk.....",
+      "..kkkkkkkkkkkk..",
+      "..kkkkkkkkkkkk..",
+      ".....wwwwww.....",
+      "....kkkwwkkk....",
+      "....kkkwwkkk....",
+      ".....wwwwww.....",
+      ".....wwkkww.....",
+      "......wwww......",
+      "....kkkkkkkk....",
+      "...kkkkkkkkkk...",
+      "..kkkkkkkkkkkk..",
+      "................"],
+    will: [
+      "................",
+      "...kkkkkkkkk....",
+      "..kwwwwwwwwwk...",
+      "..kwwwwwwwwwk...",
+      "..kwkkkkkkwwk...",
+      "..kwwwwwwwwwk...",
+      "..kwkkkkkwwwk...",
+      "..kwwwwwwwwwk...",
+      "..kwkkkkkkwwk...",
+      "..kwwwwwwwwwk...",
+      "..kwwwwwkkwwk...",
+      "..kwwwwkyykwk...",
+      "..kwwwkyyk.kk...",
+      "..kkkkkyk.......",
+      ".....kk.........",
+      "................"],
+    megaphone: [
+      "................",
+      "...........kk...",
+      "..........kpk...",
+      ".........kppk...",
+      "....kkkkkpppk...",
+      "...kpppppppk....",
+      "..kppppppppk....",
+      "..kppppppppk....",
+      "..kppppppppk....",
+      "...kpppppppk....",
+      "....kkkkkpppk...",
+      ".....kwk.kppk...",
+      ".....kwk..kpk...",
+      ".....kwk...kk...",
+      ".....kkk........",
+      "................"],
+    cheque: [
+      "................",
+      "................",
+      ".kkkkkkkkkkkkkk.",
+      ".kwwwwwwwwwwwwk.",
+      ".kwkkkkwwwwwwwk.",
+      ".kwwwwwwwwwwwwk.",
+      ".kwkkkkkkwwwwwk.",
+      ".kwwwwwwwwwwwwk.",
+      ".kwwwwwwwwkkkkk.",
+      ".kwwwwwwwkgggwk.",
+      ".kwwwwwwkgggwwk.",
+      ".kwwwwwkgggwwwk.",
+      ".kkkkkkkkkkkkkk.",
+      "................",
+      "................",
+      "................"],
+    lorry: [
+      "................",
+      "................",
+      "................",
+      ".kkkkkkkkkkk....",
+      ".kwwwwwwwwwkkk..",
+      ".kwwwwwwwwwkbkk.",
+      ".kwwwwwwwwwkbbk.",
+      ".kwwwwwwwwwkkkk.",
+      ".kwwwwwwwwwkbbk.",
+      ".kwwwwwwwwwkbbk.",
+      ".kkkkkkkkkkkkkk.",
+      "..kkwwkkkkkwwk..",
+      "..kwkkwkkkwkkw..",
+      "..kkwwkkkkkwwk..",
+      "...kk......kk...",
+      "................"],
+    drum: [
+      "................",
+      "....kkkkkkkk....",
+      "...kyyyyyyyyk...",
+      "...kkkkkkkkkk...",
+      "...kyyyyyyyyk...",
+      "...kyyyyyyyyk...",
+      "...kyykkkkyyk...",
+      "...kkkkkkkkkk...",
+      "...kyykkkkyyk...",
+      "...kyyyyyyyyk...",
+      "...kyyyyyyyyk...",
+      "...kkkkkkkkkk...",
+      "...kyyyyyyyyk...",
+      "....kkkkkkkk....",
+      "................",
+      "................"],
+    eye: [
+      "................",
+      "................",
+      "................",
+      "......kkkk......",
+      "....kkwwwwkk....",
+      "...kwwwwwwwwk...",
+      "..kwwwkkkkwwwk..",
+      ".kwwwkbbbbkwwwk.",
+      ".kwwwkbkkbkwwwk.",
+      "..kwwwkkkkwwwk..",
+      "...kwwwwwwwwk...",
+      "....kkwwwwkk....",
+      "......kkkk......",
+      "................",
+      "................",
+      "................"]
+  };
+  const PAL = { k: "--ink", b: "--blue", p: "--pink", y: "--yellow", g: "--green", w: "--paper" };
+  function drawIcon(canvas, rows) {
+    const ctx = canvas.getContext("2d");
+    const cs = getComputedStyle(document.documentElement);
+    ctx.clearRect(0, 0, 16, 16);
+    rows.forEach((row, y) => [...row].forEach((ch, x) => {
+      if (ch === ".") return;
+      ctx.fillStyle = cs.getPropertyValue(PAL[ch]).trim();
+      ctx.fillRect(x, y, 1, 1);
+    }));
+  }
+
+  /* ---------- Famous names on the compass. Rough placements, for comparison only. ---------- */
+  const FIGURES = [
+    // incorruptible
+    { name: "Mandela", x: -9, y: -7 },
+    { name: "Havel", x: -4.5, y: -7.5 },
+    { name: "Carter", x: -8, y: -5.5 },
+    { name: "Mujica", x: -6.5, y: -4 },
+    { name: "Reeves", x: -8.5, y: -2.5 },
+    // mercenary
+    { name: "Blatter", x: 4.5, y: -8.5 },
+    { name: "Madoff", x: 8.5, y: -7 },
+    { name: "Trump", x: 7, y: -6 },
+    { name: "Sarkozy", x: 5, y: -4 },
+    { name: "Bankman-Fried", x: 8, y: -2 },
+    // petty fixer
+    { name: "B Johnson", x: -8.5, y: 2.5 },
+    { name: "Stewart", x: -4.5, y: 4 },
+    { name: "Brady", x: -8.5, y: 5.5 },
+    { name: "Huhne", x: -4.5, y: 7 },
+    { name: "Ryder", x: -8.5, y: 8 },
+    // bargain villain
+    { name: "Blagojevich", x: 7, y: 3.5 },
+    { name: "Cunningham", x: 8, y: 5 },
+    { name: "Abramoff", x: 8.5, y: 6.5 },
+    { name: "Menendez", x: 4.5, y: 8 },
+    { name: "Santos", x: 9, y: 8 }
+  ];
+
+  /* ---------- Other players (shown only on the result screen) ---------- */
+  // Each player keeps one anonymous document, results/<their id>, holding only x, y and a timestamp.
+  const cap = (name) => (window.claude && window.claude.use) ? window.claude.use(name).catch(() => null) : Promise.resolve(null);
+  let myId = null, crowd = [], crowdUnsub = null;
+  const idReady = cap("user").then(u => u ? u.id() : null).then(id => { myId = id; return id; }).catch(() => null);
+
+  async function saveResult(r) {
+    const [db, id] = await Promise.all([cap("db"), idReady]);
+    if (!db || !id) return;
+    try { await db.doc("results/" + id).set({ x: r.x, y: r.y, at: Date.now() }); } catch (e) { /* view-only visitors cannot save */ }
+  }
+
+  async function startCrowd() {
+    if (crowdUnsub) return;
+    const db = await cap("db");
+    if (!db || crowdUnsub) return;
+    await idReady;
+    crowdUnsub = db.collection("results").orderBy("at", "desc").limit(500).onSnapshot((snap) => {
+      crowd = snap.docs.filter(d => d.id !== myId).map(d => d.data())
+        .filter(d => d && Number.isFinite(d.x) && Number.isFinite(d.y))
+        .map(d => ({ x: Math.max(-10, Math.min(10, d.x)), y: Math.max(-10, Math.min(10, d.y)) }));
+      drawCrowd();
+    }, () => {});
+  }
+
+  function drawCrowd() {
+    const layer = $("crowdLayer");
+    const note = $("crowdNote");
+    if (!layer) return;
+    layer.replaceChildren();
+    note.hidden = !crowd.length;
+    if (!crowd.length) return;
+    const ns = "http://www.w3.org/2000/svg";
+    for (const d of crowd) {
+      const c = document.createElementNS(ns, "rect");
+      c.setAttribute("x", Math.round(px(d.x)) - 4);
+      c.setAttribute("y", Math.round(px(d.y)) - 4);
+      c.setAttribute("width", 8);
+      c.setAttribute("height", 8);
+      c.setAttribute("style", "fill: var(--crowd)");
+      layer.appendChild(c);
+    }
+    const me = score(state.answers);
+    const same = crowd.filter(d => zone(d.x, d.y) === me.type).length;
+    note.innerHTML = `Grey squares are the <b>${crowd.length}</b> other ${crowd.length === 1 ? "player" : "players"}. <b>${same}</b> landed in the same zone as you.`;
+  }
+
+  /* ---------- Pixel coin sprite ---------- */
+  const EURO = ["..####", ".#....", "#####.", ".#....", "#####.", ".#....", "..####"];
+  function drawCoin(half) {
+    const ctx = $("coin").getContext("2d");
+    ctx.clearRect(0, 0, 16, 16);
+    const put = (x, y, c) => { ctx.fillStyle = c; ctx.fillRect(x, y, 1, 1); };
+    for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) {
+      const dx = (x + .5 - 8) / half, dy = (y + .5 - 8) / 7.5;
+      const d = dx * dx + dy * dy;
+      if (d > 1) continue;
+      const edge = d > (half > 2 ? .72 : .3);
+      put(x, y, edge ? "#1A1A1A" : (x + .5 > 8 + half * .45 ? "#E0A100" : "#FFD23F"));
+    }
+    if (half >= 6) EURO.forEach((row, j) => [...row].forEach((ch, i) => { if (ch === "#") put(5 + i, 4 + j, "#1A1A1A"); }));
+  }
+  const FRAMES = [7.5, 6, 4, 1.6, 4, 6];
+  let f = 0;
+  drawCoin(FRAMES[0]);
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    const tick = () => { f = (f + 1) % FRAMES.length; drawCoin(FRAMES[f]); setTimeout(tick, f === 0 ? 1400 : 120); };
+    setTimeout(tick, 1400);
+  }
+
+  /* ---------- Boot (keeps progress across live updates) ---------- */
+  const validAnswer = (a) => a === null || (a && (a.kind === "free" || a.kind === "never" || (a.kind === "price" && Number.isFinite(a.value) && a.value >= 1)));
+  function start(saved) {
+    if (saved && Array.isArray(saved.answers) && saved.answers.length === QUESTIONS.length && saved.answers.every(validAnswer)) state = saved;
+    show(state.screen || "intro");
+  }
+  window.claude?.hot?.snapshot?.(() => state);
+  window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+})();
+</script>
