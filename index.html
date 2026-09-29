@@ -62,7 +62,8 @@ h2 { font: 24px/1.25 var(--display); margin: 0; white-space: nowrap; }
 .qhead { display: flex; align-items: center; gap: 16px; }
 #qIcon { width: 48px; height: 48px; flex: none; image-rendering: pixelated; }
 .scenario { margin: 0; font-size: 24px; max-width: 60ch; }
-.ask { margin: 0; font-size: 24px; color: var(--blue); }
+.ask { margin: 0; font-size: 24px; color: var(--ink); }
+.ask::before { color: var(--blue); }
 .ask::before { content: "> "; }
 
 .panel { border: 4px solid var(--ink); clip-path: var(--step); background: var(--paper-2); padding: 16px; }
@@ -93,11 +94,11 @@ h2 { font: 24px/1.25 var(--display); margin: 0; white-space: nowrap; }
 
 .slide { grid-area: slide; display: grid; gap: 16px; min-width: 0; align-content: center; }
 .ladder { grid-area: slide; display: grid; gap: 8px; min-width: 0; align-content: center; }
-.ladder .px-btn { width: 100%; text-align: left; background: var(--paper-2); }
+.ladder .px-btn { width: 100%; text-align: left; background: #FFFFFF; white-space: nowrap; font-size: min(16px, calc((100vw - 104px) / 21)); padding-inline: 12px; }
 .ladder .px-btn::before { content: "> "; color: var(--blue); }
 .ladder .px-btn:hover::before, .ladder .px-btn.picked::before { color: inherit; }
 .readout { display: flex; justify-content: center; align-items: center; gap: 4px; font: 24px/1.2 var(--display); }
-#amount { font: inherit; width: 100%; max-width: 11ch; min-height: 48px; padding: 4px 8px; background: var(--paper-2); color: var(--ink); border: 0; border-bottom: 4px solid var(--ink); text-align: left; -moz-appearance: textfield; }
+#amount { font: inherit; width: 100%; max-width: 11ch; min-height: 48px; padding: 4px 8px; background: #FFFFFF; color: var(--ink); border: 0; border-bottom: 4px solid var(--ink); text-align: left; -moz-appearance: textfield; }
 #amount::-webkit-outer-spin-button, #amount::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 #amount:focus-visible { outline: 4px solid var(--blue); outline-offset: 4px; }
 input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 48px; background: transparent; margin: 0; cursor: pointer; }
@@ -109,7 +110,7 @@ input[type=range]::-moz-range-thumb { width: 16px; height: 24px; background: var
 .nav { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
 .link { font: 16px/1 var(--label); text-transform: uppercase; background: none; border: 0; padding: 16px 0; min-height: 48px; color: var(--blue); cursor: pointer; }
 .link:hover { color: var(--pink); }
-.link:disabled { color: var(--rule); cursor: default; }
+.link:disabled { color: var(--ink-soft); opacity: .5; cursor: default; }
 
 /* Intro */
 .actions { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
@@ -260,12 +261,12 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
       text: "You work at a car maker. Your report shows a steering fault that will kill about ten drivers a year. A recall would cost the company a fortune. Your manager does not offer money. She talks about your future at the company, if the report stays in your drawer.",
       ask: "What job makes you close the drawer?",
       free: ["Nothing", "I'd do it anyway"], never: ["Never", "no job is worth it"],
-      ladder: ["A good review", "Team lead", "Head of department", "A seat on the board"] },
+      ladder: ["A good review", "Team lead", "Head of department", "A board seat"] },
     { harm: 4, title: "Selling out your people", icon: "spy",
       text: "A diplomat from a country hostile to yours wants copies of your employer's internal documents every month. He does not offer money. He opens a folder and shows you what his service already knows about you.",
       ask: "What would they need to have on you?",
       free: ["Nothing", "I'd hand them over anyway"], never: ["Never", "let them publish it"],
-      ladder: ["An embarrassing photo", "An affair", "A debt nobody knows about", "A crime I got away with"] },
+      ladder: ["A bad photo", "An affair", "A secret debt", "An old crime"] },
     { harm: 2, title: "The will", icon: "will",
       text: "You look after an elderly woman with dementia. Her nephew asks you to witness a new will that leaves him everything and her grandchildren nothing. She would sign whatever you put in front of her.",
       ask: "What cut do you want?" },
@@ -273,7 +274,7 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
       text: "Suddenly your skills are exactly what propaganda needs. A party from the opposite end of the political spectrum wants you. They offer no salary, only rank and a place at the top table. Your work would fuel their propaganda and, at worst, get people hurt or killed.",
       ask: "What rank gets you in the door?",
       free: ["Nothing", "I'd volunteer"], never: ["Never", "not for any title"],
-      ladder: ["Speechwriter", "Head of communications", "Minister", "Their successor"] },
+      ladder: ["Speechwriter", "Head of comms", "Minister", "Their successor"] },
     { harm: 3, title: "Hit-and-run", icon: "cheque",
       text: "Late one night the son of a rich business family knocks a cyclist off her bike and drives away. She survives with a shattered leg. The family owns half the town and holds two seats in parliament. They ask you to tell the police the boy was at your place all evening.",
       ask: "How much do they have to write on the cheque?" },
@@ -328,13 +329,14 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
   let state = blank();
 
   const priceOf = (a) => a.kind === "price" ? a.value : 0;
+  const rung = (q, a) => a.step < q.ladder.length ? q.ladder[a.step] : "Only for money";
 
   /* ---------- Scoring (pure) ---------- */
   // Cheapness per accepted offer: free = 1, €10 or less ≈ 0.95, €100 million or more = 0.
-  // A ladder of four non-money offers maps to 0.8, 0.6, 0.4, 0.2.
+  // A ladder of four non-money offers plus "only for money" maps to 0.83, 0.67, 0.5, 0.33, 0.17.
   function cheapness(a) {
     if (a.kind === "free") return 1;
-    if (a.kind === "ladder") return 1 - (a.step + 1) / 5;
+    if (a.kind === "ladder") return 1 - (a.step + 1) / 6;
     const lg = Math.min(8, Math.max(1, Math.log10(a.value)));
     return 0.95 * (8 - lg) / 7;
   }
@@ -393,7 +395,7 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
     $("slide").hidden = !!q.ladder;
     $("ladder").hidden = !q.ladder;
     if (q.ladder) {
-      $("ladder").replaceChildren(...q.ladder.map((label, k) => {
+      $("ladder").replaceChildren(...[...q.ladder, "Only for money"].map((label, k) => {
         const b = document.createElement("button");
         b.type = "button"; b.className = "px-btn" + (a && a.kind === "ladder" && a.step === k ? " picked" : "");
         b.textContent = label;
@@ -495,7 +497,7 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
       let cell;
       if (!a || a.kind === "never") cell = `<span class="tag never">Never</span>`;
       else if (a.kind === "free") cell = `<span class="tag free">Free</span>`;
-      else if (a.kind === "ladder") cell = q.ladder[a.step];
+      else if (a.kind === "ladder") cell = rung(q, a);
       else cell = fmtShort(a.value);
       return `<tr><td>${q.title}</td><td aria-label="Harm ${q.harm} of 5">${harmBoxes(q.harm)}</td><td class="num">${cell}</td></tr>`;
     }).join("");
@@ -740,7 +742,7 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
   function postToNetlify(r) {
     if (window.claude || !/^https?:$/.test(location.protocol)) return;
     const body = new URLSearchParams({ "form-name": "results", x: r.x, y: r.y, type: r.type, taken: r.taken, total: r.total });
-    state.answers.forEach((a, k) => body.set("q" + (k + 1), !a ? "" : a.kind === "price" ? String(a.value) : a.kind === "ladder" ? QUESTIONS[k].ladder[a.step] : a.kind));
+    state.answers.forEach((a, k) => body.set("q" + (k + 1), !a ? "" : a.kind === "price" ? String(a.value) : a.kind === "ladder" ? rung(QUESTIONS[k], a) : a.kind));
     fetch("/", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: body.toString() }).catch(() => {});
   }
 
@@ -754,7 +756,7 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
     const [db, id] = await Promise.all([cap("db"), idReady]);
     if (!db || !id) return;
     // Anonymous: only the position, the type and the ten answers. No name, no id beyond the document path.
-    const answers = state.answers.map((a, k) => !a ? null : a.kind === "price" ? a.value : a.kind === "ladder" ? QUESTIONS[k].ladder[a.step] : a.kind);
+    const answers = state.answers.map((a, k) => !a ? null : a.kind === "price" ? a.value : a.kind === "ladder" ? rung(QUESTIONS[k], a) : a.kind);
     try { await db.doc("results/" + id).set({ x: r.x, y: r.y, type: r.type, answers, at: Date.now() }); } catch (e) { /* view-only visitors cannot save */ }
   }
 
@@ -817,7 +819,7 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
   }
 
   /* ---------- Boot (keeps progress across live updates) ---------- */
-  const validAnswer = (a) => a === null || (a && (a.kind === "free" || a.kind === "never" || (a.kind === "price" && Number.isFinite(a.value) && a.value >= 1) || (a.kind === "ladder" && Number.isInteger(a.step) && a.step >= 0 && a.step < 4)));
+  const validAnswer = (a) => a === null || (a && (a.kind === "free" || a.kind === "never" || (a.kind === "price" && Number.isFinite(a.value) && a.value >= 1) || (a.kind === "ladder" && Number.isInteger(a.step) && a.step >= 0 && a.step < 5)));
   function start(saved) {
     if (saved && Array.isArray(saved.answers) && saved.answers.length === QUESTIONS.length && saved.answers.every(validAnswer)) state = saved;
     show(state.screen || "intro");
