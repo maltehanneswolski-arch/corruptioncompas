@@ -92,7 +92,7 @@ h2 { font: 24px/1.25 var(--display); margin: 0; white-space: nowrap; }
 
 .slide { grid-area: slide; display: grid; gap: 16px; min-width: 0; align-content: center; }
 .ladder { grid-area: slide; display: grid; gap: 8px; min-width: 0; align-content: center; }
-.ladder .px-btn { width: 100%; text-align: left; background: #FFFFFF; white-space: nowrap; font-size: min(16px, calc((100vw - 104px) / 21)); padding-inline: 12px; }
+.ladder .px-btn { width: 100%; text-align: left; background: #FFFFFF; white-space: nowrap; font-size: min(16px, calc((100vw - 104px) / 29)); padding-inline: 12px; }
 .ladder .px-btn::before { content: "> "; color: var(--blue); }
 .ladder .px-btn:hover { background: var(--ink); color: var(--paper); }
 .ladder .px-btn:hover::before, .ladder .px-btn.picked::before { color: inherit; }
@@ -189,7 +189,7 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
       <div class="slide" id="slide">
         <label class="readout" for="amount"><span aria-hidden="true">€</span><input type="text" id="amount" value="100" inputmode="numeric" autocomplete="off" aria-label="Your price in euros"></label>
         <input type="range" id="price" min="0" max="42" step="1" value="6" aria-label="Your price" aria-valuetext="€100">
-        <button class="px-btn deal" id="takeBtn" type="button">Deal at €100</button>
+        <button class="px-btn deal" id="takeBtn" type="button">Deal</button>
       </div>
       <button class="px-btn never end" id="neverBtn" type="button"><span id="neverMain">Never</span><small id="neverSub">not for any price</small></button>
     </div>
@@ -255,15 +255,15 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
       text: "Someone leaked proof of your company's safety violations to the press. The access logs tell you who it was: a colleague you like, though not a friend. Legal wants the name. The colleague will be fired and sued.",
       ask: "What bonus would get you to hand over the name?" },
     { harm: 5, title: "A killer promotion", icon: "car",
-      text: "You work at a car maker. Your report shows a steering fault that will kill about ten drivers a year. A recall would cost the company a fortune. Your manager does not offer money. She talks about your future at the company, if the report stays in your drawer.",
-      ask: "What job makes you close the drawer?",
+      text: "You work at a car maker. Your report shows a steering fault that will kill about ten drivers a year. A recall would cost the company a fortune. Your manager wants to convince you to stay silent.",
+      ask: "What offer makes you look the other way?",
       free: ["Nothing", "I'd do it anyway"], never: ["Never", "no job is worth it"],
       ladder: ["A good review", "Team lead", "Head of department", "A board seat"] },
     { harm: 4, title: "Selling out your people", icon: "spy",
       text: "A diplomat from a country hostile to yours wants copies of your employer's internal documents every month. He does not offer money. He opens a folder and shows you what his service already knows about you.",
       ask: "What would they need to have on you?",
       free: ["Nothing", "I'd hand them over anyway"], never: ["Never", "let them publish it"],
-      ladder: ["A bad photo", "An affair", "A secret debt", "An old crime"] },
+      ladder: ["A bad photo", "An affair", "A secret debt", "An old crime"], money: "A cheque for a lot of money" },
     { harm: 2, title: "The will", icon: "will",
       text: "You look after an elderly woman with dementia. Her nephew asks you to witness a new will that leaves him everything and her grandchildren nothing. She would sign whatever you put in front of her.",
       ask: "What cut do you want?" },
@@ -271,7 +271,7 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
       text: "Suddenly your skills are exactly what propaganda needs. A party from the opposite end of the political spectrum wants you. They offer no salary, only rank and a place at the top table. Your work would fuel their propaganda and, at worst, get people hurt or killed.",
       ask: "What rank gets you in the door?",
       free: ["Nothing", "I'd volunteer"], never: ["Never", "not for any title"],
-      ladder: ["Speechwriter", "Head of comms", "Minister", "Their successor"] },
+      ladder: ["Speechwriter", "Head of comms", "Minister", "Their successor"], money: "I still prefer a lot of money" },
     { harm: 3, title: "Hit-and-run", icon: "cheque",
       text: "Late one night the son of a rich business family knocks a cyclist off her bike and drives away. She survives with a shattered leg. The family owns half the town and holds two seats in parliament. They ask you to tell the police the boy was at your place all evening.",
       ask: "How much do they have to write on the cheque?" },
@@ -326,7 +326,7 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
   let state = blank();
 
   const priceOf = (a) => a.kind === "price" ? a.value : 0;
-  const rung = (q, a) => a.step < q.ladder.length ? q.ladder[a.step] : "A lot of money";
+  const rung = (q, a) => a.step < q.ladder.length ? q.ladder[a.step] : (q.money || "A lot of money");
 
   /* ---------- Scoring (pure) ---------- */
   // Cheapness per accepted offer: free = 1, €10 or less ≈ 0.95, €100 million or more = 0.
@@ -374,7 +374,6 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
     $("amount").value = current.toLocaleString("de-DE");
     if (from !== "slider") $("price").value = nearestStep(current);
     $("price").setAttribute("aria-valuetext", fmtShort(current));
-    $("takeBtn").textContent = `Deal at ${fmtShort(current)}`;
   }
 
   function renderQuestion() {
@@ -392,7 +391,7 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
     $("slide").hidden = !!q.ladder;
     $("ladder").hidden = !q.ladder;
     if (q.ladder) {
-      $("ladder").replaceChildren(...[...q.ladder, "A lot of money"].map((label, k) => {
+      $("ladder").replaceChildren(...[...q.ladder, q.money || "A lot of money"].map((label, k) => {
         const b = document.createElement("button");
         b.type = "button"; b.className = "px-btn" + (a && a.kind === "ladder" && a.step === k ? " picked" : "");
         b.textContent = label;
@@ -442,10 +441,6 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
     el("rect", { x: P0 - 2, y: P0 - 2, width: S + 4, height: S + 4, style: "fill: none; stroke: var(--ink); stroke-width: 4" });
 
     const qn = (x, y, t, anchor) => el("text", { x, y, "font-size": 12, "text-anchor": anchor, style: "fill: var(--ink)" }, t);
-    qn(P0 + 8, P0 + 20, "INCORRUPTIBLE", "start");
-    qn(P0 + S - 8, P0 + 20, "MERCENARY", "end");
-    qn(P0 + 8, P0 + S - 10, "PETTY FIXER", "start");
-    qn(P0 + S - 8, P0 + S - 10, "BARGAIN VILLAIN", "end");
 
     const lab = (x, y, t, rot) => el("text", { x, y, "font-size": 14, "text-anchor": "middle",
       transform: rot ? `rotate(${rot} ${x} ${y})` : "" }, t);
