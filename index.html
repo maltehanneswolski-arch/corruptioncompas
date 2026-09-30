@@ -211,7 +211,6 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
         <p id="rBlurb"></p>
         <p class="coords" id="rCoords"></p>
         <p class="crowd-note" id="crowdNote" hidden></p>
-        <p class="fine">Blue squares are rough guesses for a few famous names, based on their public record. For comparison only.</p>
       </div>
     </div>
 
@@ -490,7 +489,8 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
       else cell = fmtShort(a.value);
       return `<tr><td>${q.title}</td><td aria-label="Harm ${q.harm} of 5">${harmBoxes(q.harm)}</td><td class="num">${cell}</td></tr>`;
     }).join("");
-    $("rTotal").textContent = fmtEUR(r.total) + " and a few favours";
+    const favours = state.answers.filter(a => a && a.kind === "ladder").length;
+    $("rTotal").textContent = fmtEUR(r.total) + (favours ? ` and ${favours === 1 ? "a favour" : "a few favours"}` : "");
 
     $("shareText").value = `I'm ${t.name} on the Corruption Compass (hands ${signed(r.x)}, price ${signed(r.y)}). I'd take ${r.taken} of 10 offers. Where do you land?`;
     $("copyNote").textContent = "";
