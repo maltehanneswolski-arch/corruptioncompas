@@ -59,7 +59,7 @@ h2 { font: 24px/1.25 var(--display); margin: 0; white-space: nowrap; }
 #qTitle { font-size: min(24px, calc((100vw - 112px) / 23)); }
 .qhead { display: flex; align-items: center; gap: 16px; }
 #qIcon { width: 48px; height: 48px; flex: none; image-rendering: pixelated; }
-.scenario { margin: 0; font-size: 24px; max-width: 60ch; }
+.scenario { margin: 0; font-size: 24px; }
 .ask { margin: 0; font-size: 24px; color: var(--ink); }
 .ask::before { color: var(--blue); }
 .ask::before { content: "> "; }
@@ -87,17 +87,17 @@ h2 { font: 24px/1.25 var(--display); margin: 0; white-space: nowrap; }
 .px-btn.deal { background: var(--yellow); justify-self: center; }
 .px-btn.free:hover, .px-btn.never:hover, .px-btn.deal:hover { background: var(--ink); color: var(--paper); }
 .px-btn.picked { background: var(--ink); color: var(--yellow); }
-.end { min-width: 120px; display: flex; flex-direction: column; justify-content: center; gap: 8px; text-align: center; }
+.end { min-width: 120px; max-width: 150px; display: flex; flex-direction: column; justify-content: center; gap: 8px; text-align: center; }
 .end small { font: 20px/1 var(--body); text-transform: none; }
 
 .slide { grid-area: slide; display: grid; gap: 16px; min-width: 0; align-content: center; }
-.ladder { grid-area: slide; display: grid; gap: 8px; min-width: 0; align-content: center; }
-.ladder .px-btn { width: 100%; text-align: left; background: #FFFFFF; white-space: nowrap; font-size: min(16px, calc((100vw - 104px) / 29)); padding-inline: 12px; }
+.ladder { grid-area: slide; display: grid; gap: 8px; min-width: 0; align-content: center; container-type: inline-size; }
+.ladder .px-btn { width: 100%; text-align: left; background: #FFFFFF; white-space: nowrap; overflow: hidden; font-size: min(16px, 4.4cqi); padding-inline: 12px; }
 .ladder .px-btn::before { content: "> "; color: var(--blue); }
 .ladder .px-btn:hover { background: var(--ink); color: var(--paper); }
 .ladder .px-btn:hover::before, .ladder .px-btn.picked::before { color: inherit; }
 .readout { display: flex; justify-content: center; align-items: center; gap: 4px; font: 24px/1.2 var(--display); }
-#amount { font: inherit; width: 100%; max-width: 11ch; min-height: 48px; padding: 4px 8px; background: #FFFFFF; color: var(--ink); border: 0; border-bottom: 4px solid var(--ink); text-align: left; -moz-appearance: textfield; }
+#amount { font: inherit; font-size: min(24px, calc((100vw - 120px) / 14)); width: 100%; min-height: 48px; padding: 4px 8px; background: #FFFFFF; color: var(--ink); border: 0; border-bottom: 4px solid var(--ink); text-align: left; -moz-appearance: textfield; }
 #amount::-webkit-outer-spin-button, #amount::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 #amount:focus-visible { outline: 4px solid var(--blue); outline-offset: 4px; }
 input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 48px; background: transparent; margin: 0; cursor: pointer; }
@@ -151,9 +151,8 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
 @media (max-width: 560px) {
   #coin { width: 32px; height: 32px; top: 40px; }
   .scale { grid-template-columns: 1fr 1fr; grid-template-areas: "free never" "slide slide"; }
-  .end { min-width: 0; }
+  .end { min-width: 0; max-width: none; }
   .readout { font-size: 16px; }
-  #amount { max-width: 14ch; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -260,7 +259,7 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
       free: ["Nothing", "I'd do it anyway"], never: ["Never", "no job is worth it"],
       ladder: ["A good review", "Team lead", "Head of department", "A board seat"] },
     { harm: 4, title: "Selling out your people", icon: "spy",
-      text: "A diplomat from a country hostile to yours wants copies of your employer's internal documents every month. He does not offer money. He opens a folder and shows you what his service already knows about you.",
+      text: "A diplomat from a country hostile to yours wants copies of your employer's internal documents every month. He opens a folder and shows you what his service already knows about you.",
       ask: "What would they need to have on you?",
       free: ["Nothing", "I'd hand them over anyway"], never: ["Never", "let them publish it"],
       ladder: ["A bad photo", "An affair", "A secret debt", "An old crime"], money: "A cheque for a lot of money" },
@@ -271,7 +270,7 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
       text: "Suddenly your skills are exactly what propaganda needs. A party from the opposite end of the political spectrum wants you. They offer no salary, only rank and a place at the top table. Your work would fuel their propaganda and, at worst, get people hurt or killed.",
       ask: "What rank gets you in the door?",
       free: ["Nothing", "I'd volunteer"], never: ["Never", "not for any title"],
-      ladder: ["Speechwriter", "Head of comms", "Minister", "Their successor"], money: "I still prefer a lot of money" },
+      ladder: ["Speechwriter", "Head of comms", "Minister", "Their successor"], money: "Generational wealth" },
     { harm: 3, title: "Hit-and-run", icon: "cheque",
       text: "Late one night the son of a rich business family knocks a cyclist off her bike and drives away. She survives with a shattered leg. The family owns half the town and holds two seats in parliament. They ask you to tell the police the boy was at your place all evening.",
       ask: "How much do they have to write on the cheque?" },
@@ -511,7 +510,7 @@ tfoot td { border-bottom: 0; border-top: 4px solid var(--ink); padding-top: 16px
   $("takeBtn").addEventListener("click", deal);
   $("price").addEventListener("input", (e) => setPrice(LADDER[+e.target.value], "slider"));
   $("amount").addEventListener("input", (e) => {
-    const digits = e.target.value.replace(/\D/g, "").slice(0, 12);
+    const digits = e.target.value.replace(/\D/g, "").slice(0, 9);
     if (!digits) { e.target.value = ""; return; }
     setPrice(+digits, "amount");
     e.target.setSelectionRange(e.target.value.length, e.target.value.length);
